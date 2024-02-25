@@ -33,15 +33,15 @@ env = gym.make('LunarLanderContinuous-v2')
 
 
 
-# seed = 42
-#
-# # Seed the environment for reproducibility
-# env.seed(seed)
-# torch.manual_seed(seed)
-# np.random.seed(seed)
+seed = 42
+
+# Seed the environment for reproducibility
+env.seed(seed)
+torch.manual_seed(seed)
+np.random.seed(seed)
 
 # Train the policy
-num_episodes = 2
+num_episodes = 20
 num_generations = 20
 num_runs = 3
 target_step = 10000
@@ -61,7 +61,7 @@ for run in range(num_runs):
   run_rewards =[]
   for gen in range(num_generations):
     # Get N amount of pertubations (remember that each N produces two pertubations)
-    policies = generate_perturbed_policies(policy, N, sigma=0.0005)
+    policies = generate_perturbed_policies(policy, N, sigma=0.01)
     #Add the original policy to the list of policies
     # policies.append(policy)
     rewards = []
@@ -107,22 +107,21 @@ for run in range(num_runs):
     #Log per generation the best policy (index) and best reward
     print(f'Generation {gen}: Best Reward: {best_reward}, Best Policy: {np.argmax(rewards)}')
     #Get the top 5 policies
-    top_policies = np.argsort(rewards)[-5:]
+    top_policies = np.argsort(rewards)[-20:]
     #Reverse the order to get the best policies first
     top_policies = top_policies[::-1]
     #Get the top 10 rewards
     top_rewards = [rewards[i] for i in top_policies]
     #Print the top 10 policies and rewards
-    print(f'Top 5 Policies: {top_policies}')
-    print(f'Top 5 Rewards: {top_rewards}')
+    # print(f'Top 5 Policies: {top_policies}')
+    # print(f'Top 5 Rewards: {top_rewards}')
     #Form the average of the the 5 best rewards (by averaging all the weights/parameters)
     average_policy = copy.deepcopy(policies[top_policies[0]])
-    weight = max(1, best_reward)
-    for i in range(1, 5):
+    weight = 1
+    for i in range(1, 20):
       for param, avg_param in zip(policies[top_policies[i]].parameters(), average_policy.parameters()):
         avg_param.data += param.data * (1/(2*(i+1)))
-        policy_reward = top_rewards[i]
-        weight += max((1/(2*(i+1))), policy_reward)
+        weight += (1/(2*(i+1)))
     for param in average_policy.parameters():
       param.data /= weight
     #Update the policy
