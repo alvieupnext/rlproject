@@ -1,70 +1,155 @@
-import torch
-import copy
-#Population Methods
-#Population Methods
-# Zeroth-order optimization still depends on a learning rate: once the perturbations are evaluated,
-# they are used to compute a direction in which to change θ, and the direction is followed with a small
-# learning rate. This still has problems with local minima.
-# Population methods follow a simpler approach: many perturbations of θ are produced, and the best
-# one is copied into θ:
-# 1. The policy π has parameters θ.
-# 2. Produce N perturbations of θ, now called θi with i going from 1 to N.
-# 3. Evaluate each θi in the environment, by performing one or more episodes (as with Zeroth-
-# order optimization). This produces one “score” per θi.
-# 4. Select the θi that has the largest score, and put it in θ. The policy has now been updated.
-# 5. Go back to Step 1.
-# Population methods can be made more complex (selecting the top-K perturbations and doing
-# something on them, for instance), but the simple method described above is already enough for this
-# project.
-# Population methods are not sensitive to local optima, and are generally better at eventually learning
-# the optimal policy. With an infinite amount of time, they will try every possible θ, and find the one
-# that leads to the best returns. However, population methods are not sample-efficient. Each
-# application of the algorithm above requires at least N full episodes in the environment, to compute
-# only a single updated θ.
+import elegantrl
+# from elegantrl.run import *
+import gym
+import gym.envs.box2d.lunar_lander as lunar_lander
+from elegantrl.agents import AgentModSAC
+from elegantrl.train.config import get_gym_env_args, Config
+from elegantrl.train.run import *
 
-#Write a function that given a policy, will produce N perturbations of θ, with a perturbation strength of σ.
-# This function should receive a parametric policy and return a list of perturbed policies.
-def perturb_policy_zeroth_order(original_policy, sigma=0.1):
+from policy import ParametricPolicy
+from pertubation import *
 
-  # Get the parameters of the original policy
-  original_parameters = [p.data for p in original_policy.parameters()]
+gym.logger.set_level(40) # Block warning
 
-  # Copy the original policy to create a new instance for perturbation
-  perturbed_policy_plus = copy.deepcopy(original_policy)
-  perturbed_policy_minus = copy.deepcopy(original_policy)
+# env = gym.make('LunarLanderContinuous-v2')
 
-  # Perturb each parameter
-  for param, param_plus, param_minus in zip(original_parameters, perturbed_policy_plus.parameters(),
-                                            perturbed_policy_minus.parameters()):
-    # Create the perturbation vector
-    perturbation = torch.randn_like(param) * sigma
+# env_func = gym.make
+# env_args = {
+#     # "env_num": 1,
+#     "env_name": "LunarLanderContinuous-v2",
+#     "max_step": 1000,
+#     "state_dim": 8,
+#     "action_dim": 2,
+#     "if_discrete": False,
+#     "target_return": 200,
+#     "id": "LunarLanderContinuous-v2",
+# }
 
-    # Apply the perturbation
-    param_plus.data += perturbation
-    param_minus.data -= perturbation
+# # Define the number of episodes for training
+# num_episodes = 1000  # Or any other number of episodes you wish to train for
 
-  return perturbed_policy_plus, perturbed_policy_minus
+# Initialize the environment using the provided utility functions and arguments
+env = gym.make('LunarLanderContinuous-v2')
 
-#Write a function that given a policy, will produce N perturbations of θ, with a perturbation strength of σ.
-def generate_perturbed_policies(original_policy, N, sigma):
-  perturbed_policies = []
 
-  # Get the parameters of the original policy
-  original_parameters = [p.data for p in original_policy.parameters()]
 
-  for _ in range(N):
-    # Copy the original policy to create a new instance for perturbation
-    perturbed_policy = copy.deepcopy(original_policy)
+seed = 42
 
-    # Perturb each parameter
-    for original_param, perturbed_param in zip(original_parameters, perturbed_policy.parameters()):
-      # Create the perturbation
-      perturbation = torch.randn_like(original_param) * sigma
+# Seed the environment for reproducibility
+env.seed(seed)
+torch.manual_seed(seed)
+np.random.seed(seed)
 
-      # Apply the perturbation
-      perturbed_param.data = original_param + perturbation
+# Train the policy
+num_episodes = 20
+num_generations = 20
+num_runs = 3
+target_step = 10000
+gamma = 0.99
+N = 40
+state_dim = 8
+action_dim = 2
 
-    # Add the perturbed policy to the list
-    perturbed_policies.append(perturbed_policy)
 
-  return perturbed_policies
+total_rewards = []
+# Start with a policy
+# Initialize policy
+for run in range(num_runs):
+  policy = ParametricPolicy(input_size=state_dim,
+                            hidden_size=128,
+                            output_size=action_dim)
+  run_rewards =[]
+  for gen in range(num_generations):
+    # Get N amount of pertubations (remember that each N produces two pertubations)
+    policies = generate_perturbed_policies(policy, N, sigma=0.01)
+    #Add the original policy to the list of policies
+    policies.append(policy)
+    rewards = []
+    #We evaluate each policy
+    for perturbed_policy in policies:
+      policy_reward = 0
+      for episode in range(num_episodes):
+        state = env.reset()
+        episode_reward = 0
+
+        for t in range(target_step):
+          # Convert state into a tensor
+          state_tensor = torch.tensor(state, dtype=torch.float32)
+
+          # Generate an action from the policy
+          action = policy(state_tensor)
+
+          # Perform the action in the environment
+          next_state, reward, done, _ = env.step(action.detach().numpy())
+
+          # Discount the reward
+          episode_reward += reward * (gamma ** t)
+
+          # Prepare for the next iteration
+          state = next_state
+
+          # If the episode is done, exit the loop
+          if done:
+            break
+
+        #Add the episode reward to the policy reward
+        policy_reward += episode_reward
+        # # Log the episode's results
+        # print(f'Episode {episode}: Total Reward: {episode_reward}')
+      #Average the policy reward over the number of episodes
+      policy_reward /= num_episodes
+      #Add the policy reward to the list of rewards
+      rewards.append(policy_reward)
+    #Select the best policy
+    best_policy = policies[np.argmax(rewards)]
+    #Select the max reward
+    best_reward = np.max(rewards)
+    #Log per generation the best policy (index) and best reward
+    print(f'Generation {gen}: Best Reward: {best_reward}, Best Policy: {np.argmax(rewards)}')
+    #Get the top 5 policies
+    top_policies = np.argsort(rewards)[-20:]
+    #Reverse the order to get the best policies first
+    top_policies = top_policies[::-1]
+    #Get the top 10 rewards
+    top_rewards = [rewards[i] for i in top_policies]
+    #Print the top 10 policies and rewards
+    # print(f'Top 5 Policies: {top_policies}')
+    # print(f'Top 5 Rewards: {top_rewards}')
+    #Form the average of the the 5 best rewards (by averaging all the weights/parameters)
+    average_policy = copy.deepcopy(policies[top_policies[0]])
+    weight = 1
+    for i in range(1, 20):
+      for param, avg_param in zip(policies[top_policies[i]].parameters(), average_policy.parameters()):
+        avg_param.data += param.data * (1/(2*(i+1)))
+        weight += (1/(2*(i+1)))
+    for param in average_policy.parameters():
+      param.data /= weight
+    #Update the policy
+    policy = average_policy
+    #Add the best reward to the list of rewards
+    run_rewards.append(best_reward)
+  total_rewards.append(run_rewards)
+
+# Convert the rewards to a numpy array
+total_rewards = np.array(total_rewards)
+# Average the rewards over the number of runs
+average_total_rewards = np.mean(total_rewards, axis=0)
+
+# Plot the rewards
+import matplotlib.pyplot as plt
+plt.plot(average_total_rewards)
+plt.xlabel('Generation')
+plt.ylabel('Reward')
+plt.title('Reward over Generations')
+plt.show()
+
+
+# args = Config(AgentModSAC, env_class=env_func, env_args=env_args)
+#
+# args.target_step = args.max_step
+# args.gamma = 0.99
+# args.eval_times = 2**5
+# args.random_seed = 2022
+#
+# train_agent(args)
+
