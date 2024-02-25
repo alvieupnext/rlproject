@@ -46,7 +46,7 @@ num_generations = 20
 num_runs = 3
 target_step = 10000
 gamma = 0.99
-N = 100
+N = 40
 state_dim = 8
 action_dim = 2
 
@@ -63,7 +63,7 @@ for run in range(num_runs):
     # Get N amount of pertubations (remember that each N produces two pertubations)
     policies = generate_perturbed_policies(policy, N, sigma=0.01)
     #Add the original policy to the list of policies
-    # policies.append(policy)
+    policies.append(policy)
     rewards = []
     #We evaluate each policy
     for perturbed_policy in policies:
