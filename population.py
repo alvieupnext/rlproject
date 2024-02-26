@@ -41,12 +41,12 @@ torch.manual_seed(seed)
 np.random.seed(seed)
 
 # Train the policy
-num_episodes = 20
-num_generations = 20
-num_runs = 3
-target_step = 10000
+num_episodes = 10
+num_generations = 100
+num_runs = 5
+target_step = 10000000000
 gamma = 0.99
-N = 40
+N = 100
 state_dim = 8
 action_dim = 2
 
