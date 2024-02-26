@@ -41,12 +41,12 @@ torch.manual_seed(seed)
 np.random.seed(seed)
 
 # Train the policy
-num_episodes = 10
+num_episodes = 20
 num_generations = 100
-num_runs = 5
-target_step = 10000000000
+num_runs = 1
+target_step = 1000000000000
 gamma = 0.99
-N = 20
+N = 50
 state_dim = 8
 action_dim = 2
 
@@ -113,7 +113,7 @@ for run in range(num_runs):
     #Log per generation the best policy (index) and best reward
     print(f'Generation {gen +1}: Best Reward: {best_reward}, Best Policy: {np.argmax(rewards)}')
     #Get the top 5 policies
-    top_policies = np.argsort(rewards)[-10:]
+    top_policies = np.argsort(rewards)[-5:]
     #Reverse the order to get the best policies first
     top_policies = top_policies[::-1]
     #Get the top 10 rewards
@@ -122,12 +122,12 @@ for run in range(num_runs):
     # print(f'Top 5 Policies: {top_policies}')
     # print(f'Top 5 Rewards: {top_rewards}')
     #Form the average of the the 10 best rewards (by averaging all the weights/parameters)
-    average_policy = copy.deepcopy(policies[top_policies[0]])
+    average_policy = copy.deepcopy(best_policy)
     weight = 1
-    for i in range(1, 10):
+    for i in range(1, 5):
       for param, avg_param in zip(policies[top_policies[i]].parameters(), average_policy.parameters()):
         avg_param.data += param.data * (1/(2*(i+1)))
-        weight += (1/(2*(i+1)))
+        weight += (1/(2**i))
     for param in average_policy.parameters():
       param.data /= weight
     #Update the policy
@@ -143,10 +143,25 @@ average_total_rewards = np.mean(total_rewards, axis=0)
 
 # Plot the rewards
 import matplotlib.pyplot as plt
-plt.plot(average_total_rewards)
-plt.xlabel('Generation')
-plt.ylabel('Reward')
-plt.title('Reward over Generations')
+import seaborn as sns
+# plt.style.use('seaborn-darkgrid')  # Set a style to make the plot look nicer
+sns.set(style='darkgrid')  # Set a style to make the plot look nicer
+
+plt.figure(figsize=(10, 6))  # Set the figure size for better readability
+
+plt.plot(average_total_rewards, color='steelblue', linewidth=2, linestyle='-', marker='o', markersize=8, markerfacecolor='gold', markeredgewidth=2, markeredgecolor='navy')  # Customize line and marker
+
+plt.xlabel('Generation', fontsize=14, fontweight='bold', color='navy')  # Customize the x-label
+plt.ylabel('Reward', fontsize=14, fontweight='bold', color='navy')  # Customize the y-label
+plt.title('Reward over Generations', fontsize=16, fontweight='bold', color='darkred')  # Customize the title
+
+plt.xticks(fontsize=12)  # Customize the x-ticks
+plt.yticks(fontsize=12)  # Customize the y-ticks
+
+plt.grid(True, which='both', linestyle='--', linewidth=0.5)  # Add gridlines for better readability
+
+plt.tight_layout()  # Adjust layout to not cut off labels
+
 plt.show()
 
 
