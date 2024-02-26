@@ -41,15 +41,15 @@ torch.manual_seed(seed)
 np.random.seed(seed)
 
 # Train the policy
-num_episodes = 30
-num_generations = 30
+num_episodes = 20
+num_generations = 20
 num_runs = 12
 target_step = 1000000000000
 gamma = 0.99
-N = 30
+N = 20
 state_dim = 8
 action_dim = 2
-sigma = 0.01
+sigma = 0.001
 
 def evaluate_policy(policy):
   policy_reward = 0
