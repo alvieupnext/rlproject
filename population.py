@@ -43,10 +43,10 @@ np.random.seed(seed)
 # Train the policy
 num_episodes = 20
 num_generations = 100
-num_runs = 1
+num_runs = 12
 target_step = 1000000000000
 gamma = 0.99
-N = 50
+N = 20
 state_dim = 8
 action_dim = 2
 
@@ -145,7 +145,7 @@ average_total_rewards = np.mean(total_rewards, axis=0)
 import matplotlib.pyplot as plt
 import seaborn as sns
 # plt.style.use('seaborn-darkgrid')  # Set a style to make the plot look nicer
-sns.set(style='darkgrid')  # Set a style to make the plot look nicer
+sns.set(style='whitegrid')  # Set a style to make the plot look nicer
 
 plt.figure(figsize=(10, 6))  # Set the figure size for better readability
 
