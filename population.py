@@ -41,12 +41,12 @@ torch.manual_seed(seed)
 np.random.seed(seed)
 
 # Train the policy
-num_episodes = 20
-num_generations = 100
+num_episodes = 2
+num_generations = 20
 num_runs = 12
 target_step = 1000000000000
 gamma = 0.99
-N = 20
+N = 50
 state_dim = 8
 action_dim = 2
 
@@ -94,6 +94,11 @@ for run in range(num_runs):
                             hidden_size=128,
                             output_size=action_dim)
   run_rewards =[]
+  #Evaluate the first policy
+  policy_reward = evaluate_policy(policy)
+  print(f'Generation {0}: Reward: {policy_reward}')
+  #Add the reward to the list of rewards
+  run_rewards.append(policy_reward)
   for gen in range(num_generations):
     # Get N amount of pertubations (remember that each N produces two pertubations)
     policies = generate_perturbed_policies(policy, N, sigma=0.01)
