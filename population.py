@@ -41,7 +41,7 @@ torch.manual_seed(seed)
 np.random.seed(seed)
 
 # Train the policy
-num_episodes = 2
+num_episodes = 20
 num_generations = 20
 num_runs = 12
 target_step = 1000000000000
@@ -118,14 +118,14 @@ for run in range(num_runs):
     #Log per generation the best policy (index) and best reward
     print(f'Generation {gen +1}: Best Reward: {best_reward}, Best Policy: {np.argmax(rewards)}')
     #Get the top 5 policies
-    top_policies = np.argsort(rewards)[-5:]
+    top_policies = np.argsort(rewards)[-3:]
     #Reverse the order to get the best policies first
     top_policies = top_policies[::-1]
     #Get the top 10 rewards
     top_rewards = [rewards[i] for i in top_policies]
     #Print the top 10 policies and rewards
-    # print(f'Top 5 Policies: {top_policies}')
-    # print(f'Top 5 Rewards: {top_rewards}')
+    print(f'Top Policies: {top_policies}')
+    print(f'Top Rewards: {top_rewards}')
     #Form the average of the the 10 best rewards (by averaging all the weights/parameters)
     average_policy = copy.deepcopy(best_policy)
     weight = 1
@@ -166,6 +166,8 @@ plt.yticks(fontsize=12)  # Customize the y-ticks
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)  # Add gridlines for better readability
 
 plt.tight_layout()  # Adjust layout to not cut off labels
+
+#
 
 plt.show()
 
