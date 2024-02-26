@@ -46,9 +46,44 @@ num_generations = 100
 num_runs = 5
 target_step = 10000000000
 gamma = 0.99
-N = 100
+N = 20
 state_dim = 8
 action_dim = 2
+
+def evaluate_policy(policy):
+  policy_reward = 0
+  for episode in range(num_episodes):
+    state = env.reset()
+    episode_reward = 0
+
+    for t in range(target_step):
+      # Convert state into a tensor
+      state_tensor = torch.tensor(state, dtype=torch.float32)
+
+      # Generate an action from the policy
+      action = policy(state_tensor)
+
+      # Perform the action in the environment
+      next_state, reward, done, _ = env.step(action.detach().numpy())
+
+      # Discount the reward
+      episode_reward += reward * (gamma ** t)
+
+      # Prepare for the next iteration
+      state = next_state
+
+      # If the episode is done, exit the loop
+      if done:
+        break
+
+    # Add the episode reward to the policy reward
+    policy_reward += episode_reward
+    # # Log the episode's results
+    # print(f'Episode {episode}: Total Reward: {episode_reward}')
+  # Average the policy reward over the number of episodes
+  policy_reward /= num_episodes
+  return policy_reward
+
 
 
 total_rewards = []
@@ -65,39 +100,10 @@ for run in range(num_runs):
     #Add the original policy to the list of policies
     policies.append(policy)
     rewards = []
+
     #We evaluate each policy
     for perturbed_policy in policies:
-      policy_reward = 0
-      for episode in range(num_episodes):
-        state = env.reset()
-        episode_reward = 0
-
-        for t in range(target_step):
-          # Convert state into a tensor
-          state_tensor = torch.tensor(state, dtype=torch.float32)
-
-          # Generate an action from the policy
-          action = policy(state_tensor)
-
-          # Perform the action in the environment
-          next_state, reward, done, _ = env.step(action.detach().numpy())
-
-          # Discount the reward
-          episode_reward += reward * (gamma ** t)
-
-          # Prepare for the next iteration
-          state = next_state
-
-          # If the episode is done, exit the loop
-          if done:
-            break
-
-        #Add the episode reward to the policy reward
-        policy_reward += episode_reward
-        # # Log the episode's results
-        # print(f'Episode {episode}: Total Reward: {episode_reward}')
-      #Average the policy reward over the number of episodes
-      policy_reward /= num_episodes
+      policy_reward = evaluate_policy(perturbed_policy)
       #Add the policy reward to the list of rewards
       rewards.append(policy_reward)
     #Select the best policy
@@ -105,9 +111,9 @@ for run in range(num_runs):
     #Select the max reward
     best_reward = np.max(rewards)
     #Log per generation the best policy (index) and best reward
-    print(f'Generation {gen}: Best Reward: {best_reward}, Best Policy: {np.argmax(rewards)}')
+    print(f'Generation {gen +1}: Best Reward: {best_reward}, Best Policy: {np.argmax(rewards)}')
     #Get the top 5 policies
-    top_policies = np.argsort(rewards)[-20:]
+    top_policies = np.argsort(rewards)[-10:]
     #Reverse the order to get the best policies first
     top_policies = top_policies[::-1]
     #Get the top 10 rewards
@@ -115,10 +121,10 @@ for run in range(num_runs):
     #Print the top 10 policies and rewards
     # print(f'Top 5 Policies: {top_policies}')
     # print(f'Top 5 Rewards: {top_rewards}')
-    #Form the average of the the 5 best rewards (by averaging all the weights/parameters)
+    #Form the average of the the 10 best rewards (by averaging all the weights/parameters)
     average_policy = copy.deepcopy(policies[top_policies[0]])
     weight = 1
-    for i in range(1, 20):
+    for i in range(1, 10):
       for param, avg_param in zip(policies[top_policies[i]].parameters(), average_policy.parameters()):
         avg_param.data += param.data * (1/(2*(i+1)))
         weight += (1/(2*(i+1)))
