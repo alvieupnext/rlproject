@@ -124,7 +124,7 @@ for run in range(num_runs):
     #Form the average of the the 10 best rewards (by averaging all the weights/parameters)
     average_policy = copy.deepcopy(best_policy)
     weight = 1
-    for i in range(1, 5):
+    for i in range(1, 3):
       for param, avg_param in zip(policies[top_policies[i]].parameters(), average_policy.parameters()):
         avg_param.data += param.data * (1/(2*(i+1)))
         weight += (1/(2**i))
