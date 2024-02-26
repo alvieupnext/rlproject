@@ -41,14 +41,15 @@ torch.manual_seed(seed)
 np.random.seed(seed)
 
 # Train the policy
-num_episodes = 20
-num_generations = 20
+num_episodes = 30
+num_generations = 30
 num_runs = 12
 target_step = 1000000000000
 gamma = 0.99
-N = 50
+N = 30
 state_dim = 8
 action_dim = 2
+sigma = 0.01
 
 def evaluate_policy(policy):
   policy_reward = 0
@@ -101,7 +102,7 @@ for run in range(num_runs):
   run_rewards.append(policy_reward)
   for gen in range(num_generations):
     # Get N amount of pertubations (remember that each N produces two pertubations)
-    policies = generate_perturbed_policies(policy, N, sigma=0.01)
+    policies = generate_perturbed_policies(policy, N, sigma=sigma)
     #Add the original policy to the list of policies
     policies.append(policy)
     rewards = []
@@ -158,7 +159,7 @@ plt.plot(average_total_rewards, color='steelblue', linewidth=2, linestyle='-', m
 
 plt.xlabel('Generation', fontsize=14, fontweight='bold', color='navy')  # Customize the x-label
 plt.ylabel('Reward', fontsize=14, fontweight='bold', color='navy')  # Customize the y-label
-plt.title('Reward over Generations', fontsize=16, fontweight='bold', color='darkred')  # Customize the title
+plt.title(f'Reward over Generations (sigma: {sigma}, {N} perturbations, {num_generations} generations, {num_episodes} episodes)', fontsize=16, fontweight='bold', color='darkred')  # Customize the title
 
 plt.xticks(fontsize=12)  # Customize the x-ticks
 plt.yticks(fontsize=12)  # Customize the y-ticks
@@ -167,7 +168,8 @@ plt.grid(True, which='both', linestyle='--', linewidth=0.5)  # Add gridlines for
 
 plt.tight_layout()  # Adjust layout to not cut off labels
 
-#
+# Save the plot
+plt.savefig(f'Reward over Generations (sigma: {sigma}, {N} perturbations, {num_generations} generations, {num_episodes} episodes).pdf', format='pdf', dpi=300)  # Save the plot to a file
 
 plt.show()
 
