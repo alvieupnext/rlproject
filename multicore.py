@@ -35,7 +35,7 @@ def generate_configs():
 
 #Initialize ray and add the remotes
 if __name__ == '__main__':
-    ray.init()
+    ray.init(num_cpus=20)
     configs = generate_configs()
     futures = [run_experiment_ray.remote(config) for config in configs]
     ray.get(futures)
