@@ -6,7 +6,7 @@ def plot_rewards(average_total_rewards, sigma, N, num_generations, num_episodes)
 
   plt.figure(figsize=(10, 6))  # Set the figure size for better readability
 
-  plt.plot(average_total_rewards, color='steelblue', linewidth=2, linestyle='-', marker='o', markersize=8,
+  plt.plot(average_total_rewards, color='steelblue', linewidth=2, linestyle='-', markersize=8,
            markerfacecolor='gold', markeredgewidth=2, markeredgecolor='navy')  # Customize line and marker
 
   plt.xlabel('Generation', fontsize=14, fontweight='bold', color='navy')  # Customize the x-label

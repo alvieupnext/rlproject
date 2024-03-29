@@ -211,7 +211,8 @@ def read_project(project_name):
   """
   results_dir = os.path.join('results', project_name)
   config_file_path = os.path.join(results_dir, 'config.txt')
-  average_file_path = os.path.join(results_dir, 'summary_average.txt')
+  # Placeholder, read instead from run0.txt
+  average_file_path = os.path.join(results_dir, 'run0.txt')
   std_file_path = os.path.join(results_dir, 'summary_std.txt')
 
   # Read configuration
@@ -227,12 +228,13 @@ def read_project(project_name):
         sigma = float(line.split(':')[-1])
       elif 'num_episodes' in line:
         num_episodes = int(line.split(':')[-1])
+      elif 'keep_previous_best' in line:
+        keep_previous_best = bool(line.split(':')[-1])
       elif 'k' in line:
         k = int(line.split(':')[-1])
       elif 'max_steps' in line:
         max_steps = int(line.split(':')[-1])
-      elif 'keep_previous_best' in line:
-        keep_previous_best = bool(line.split(':')[-1])
+
 
 
   # Read average rewards
@@ -247,13 +249,13 @@ def read_project(project_name):
 
 
 # Train the policy
-num_episodes = 10
-num_generations = 300
-num_runs = 1
-max_steps = 100_000
-N = 20
-sigma = 0.01
-k = 1
+# num_episodes = 10
+# num_generations = 300
+# num_runs = 1
+# max_steps = 100_000
+# N = 20
+# sigma = 0.01
+# k = 1
 
 # run_experiment('lunar_lander_tanh', num_runs, num_generations, num_episodes, N, sigma, k)
 #
@@ -265,10 +267,14 @@ def generate_project_name(num_runs, num_generations, num_episodes, N, sigma, k, 
 
 
 if __name__ == '__main__':
-  run_experiment('lunar_lander_tanh', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
-  total_rewards, _, (num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best) = read_project(
+  # run_experiment('lunar_lander_tanh', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
+  total_rewards, _, config = read_project(
     'lunar_lander_tanh')
+  print(config)
+  num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best = config
+  print(total_rewards)
   plot_rewards(total_rewards, sigma, N, num_generations, num_episodes)
+
 # total_rewards = []
 # # Start with a policy
 # # Initialize policy
