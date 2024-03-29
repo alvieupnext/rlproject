@@ -2,12 +2,12 @@ from population import run_experiment, generate_project_name
 import ray
 
 # The various hyperparameters
-max_step_configs = [10000, 50000, 100000]
-N_configs = [5, 10, 20]
-k_s = [1, 2, 3]
-generation_counts = [500]
+max_step_configs = [100, 500, 1000, 5000]
+N_configs = [10]
+k_s = [1]
+generation_counts = [2000]
 sigmas = [0.01]
-episode_counts = [5, 10, 20]
+episode_counts = [20]
 kept_previous = True
 num_runs = 1
 
