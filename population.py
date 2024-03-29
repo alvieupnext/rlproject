@@ -62,7 +62,8 @@ def evaluate_policy(policy, num_episodes):
       next_state, reward, done, _ = env.step(action.detach().numpy())
 
       # Discount the reward
-      episode_reward += reward * (gamma ** t)
+      # episode_reward += reward * (gamma ** t)
+      episode_reward += reward
 
       # Prepare for the next iteration
       state = next_state
@@ -241,21 +242,21 @@ def read_project(project_name):
   with open(average_file_path, 'r') as file:
     average_rewards = np.array([float(value) for value in file.read().split(',')])
 
-  # Read standard deviation of rewards
-  with open(std_file_path, 'r') as file:
-    std_rewards = np.array([float(value) for value in file.read().split(',')])
+  # # Read standard deviation of rewards
+  # with open(std_file_path, 'r') as file:
+  #   std_rewards = np.array([float(value) for value in file.read().split(',')])
 
-  return average_rewards, std_rewards, (num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best)
+  return average_rewards, (num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best)
 
 
 # Train the policy
-# num_episodes = 10
-# num_generations = 300
-# num_runs = 1
-# max_steps = 100_000
-# N = 20
-# sigma = 0.01
-# k = 1
+num_episodes = 20
+num_generations = 2000
+num_runs = 1
+max_steps = 100_00
+N = 10
+sigma = 0.01
+k = 1
 
 # run_experiment('lunar_lander_tanh', num_runs, num_generations, num_episodes, N, sigma, k)
 #
@@ -267,13 +268,40 @@ def generate_project_name(num_runs, num_generations, num_episodes, N, sigma, k, 
 
 
 if __name__ == '__main__':
-  # run_experiment('lunar_lander_tanh', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
-  total_rewards, _, config = read_project(
-    'lunar_lander_tanh')
-  print(config)
+  run_experiment('lunar_lander_optimal', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
+  total_rewards, config = read_project(
+    'lunar_lander_optimal')
   num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best = config
-  print(total_rewards)
-  plot_rewards(total_rewards, sigma, N, num_generations, num_episodes)
+  plot_rewards('lunar_lander_optimal', total_rewards, sigma, N, num_generations, num_episodes)
+  # Get all folders in the results directory, that start with ll
+  # project_names = [folder for folder in os.listdir('results') if folder.startswith('ll')]
+  # # Get the average rewards and standard deviations for each project
+  # for project_name in project_names:
+  #   average_rewards, config = read_project(project_name)
+  #   # Take the average of the rewards
+  #   average = np.mean(average_rewards)
+  #   print(f'Project: {project_name}, Average Reward: {average}')
+  #   #Get the average of the second half of the rewards
+  #   average = np.mean(average_rewards[len(average_rewards)//2:])
+  #   print(f'Project: {project_name}, Second Half Average Reward: {average}')
+  #   #Get the average of the last 100 rewards
+  #   average = np.mean(average_rewards[-100:])
+  #   print(f'Project: {project_name}, Last 100 Average Reward: {average}')
+  #   #If the overall average is lower than 40
+  #   if average < 40:
+  #     continue
+  #   num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best = config
+  #   # print(f'Project: {project_name}')
+  #   # print(f'Average Rewards: {average_rewards}')
+  #   # print(f'Configuration: {config}')
+  #   plot_rewards(project_name, average_rewards, sigma, N, num_generations, num_episodes)
+  # total_rewards, _, config = read_project(
+  #   'lunar_lander_tanh')
+  # print(config)
+  # run_experiment('lunar_lander_tanh', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
+  # num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best = config
+  # print(total_rewards)
+  # plot_rewards(total_rewards, sigma, N, num_generations, num_episodes)
 
 # total_rewards = []
 # # Start with a policy

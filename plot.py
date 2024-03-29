@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def plot_rewards(average_total_rewards, sigma, N, num_generations, num_episodes):
+def plot_rewards(project_name, average_total_rewards, sigma, N, num_generations, num_episodes):
   sns.set(style='whitegrid')  # Set a style to make the plot look nicer
 
   plt.figure(figsize=(10, 6))  # Set the figure size for better readability
@@ -13,7 +13,9 @@ def plot_rewards(average_total_rewards, sigma, N, num_generations, num_episodes)
   plt.ylabel('Reward', fontsize=14, fontweight='bold', color='navy')  # Customize the y-label
   plt.title(
     f'Reward over Generations (sigma: {sigma}, {N} perturbations, {num_generations} generations, {num_episodes} episodes)',
-    fontsize=16, fontweight='bold', color='darkred')  # Customize the title
+    fontsize=16, fontweight='bold', color='darkred')
+  plt.suptitle(project_name, fontsize=16, fontweight='bold', color='darkred')
+
 
   plt.xticks(fontsize=12)  # Customize the x-ticks
   plt.yticks(fontsize=12)  # Customize the y-ticks
