@@ -45,7 +45,7 @@ gamma = 0.99
 
 
 
-def evaluate_policy(policy, num_episodes):
+def evaluate_policy(policy, num_episodes, max_steps):
   policy_reward = 0
   for episode in range(num_episodes):
     state = env.reset()
@@ -157,7 +157,7 @@ def run_experiment(project_name, num_runs, num_generations, num_episodes, N, sig
     with open(os.path.join(results_dir, f'run{run}.txt'), 'w') as f:
       pass  # This will clear the file contents at the beginning of the run
 
-    policy_reward = evaluate_policy(policy, num_episodes)
+    policy_reward = evaluate_policy(policy, num_episodes, max_steps)
     print(f'Generation 0: Reward: {policy_reward}')
     run_rewards.append(policy_reward)
     # Now open the file in append mode to start adding data
@@ -172,7 +172,7 @@ def run_experiment(project_name, num_runs, num_generations, num_episodes, N, sig
       rewards = []
 
       for perturbed_policy in policies:
-        policy_reward = evaluate_policy(perturbed_policy, num_episodes)
+        policy_reward = evaluate_policy(perturbed_policy, num_episodes, max_steps)
         rewards.append(policy_reward)
 
       average_policy, best_reward = average_top_k_policies(policies, rewards, k=k)
@@ -249,15 +249,6 @@ def read_project(project_name):
   return average_rewards, (num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best)
 
 
-# Train the policy
-num_episodes = 20
-num_generations = 2000
-num_runs = 1
-max_steps = 100_00
-N = 10
-sigma = 0.01
-k = 1
-
 # run_experiment('lunar_lander_tanh', num_runs, num_generations, num_episodes, N, sigma, k)
 #
 def generate_project_name(num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best):
@@ -268,11 +259,19 @@ def generate_project_name(num_runs, num_generations, num_episodes, N, sigma, k, 
 
 
 if __name__ == '__main__':
-  run_experiment('lunar_lander_optimal', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
+  # Train the policy
+  num_episodes = 20
+  num_generations = 2000
+  num_runs = 1
+  max_steps = 10_0
+  N = 10
+  sigma = 0.01
+  k = 1
+  run_experiment('lunar_lander_optimal_100steps', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
   total_rewards, config = read_project(
     'lunar_lander_optimal')
   num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best = config
-  plot_rewards('lunar_lander_optimal', total_rewards, sigma, N, num_generations, num_episodes)
+  plot_rewards('lunar_lander_optimal_1ksteps', total_rewards, sigma, N, num_generations, num_episodes)
   # Get all folders in the results directory, that start with ll
   # project_names = [folder for folder in os.listdir('results') if folder.startswith('ll')]
   # # Get the average rewards and standard deviations for each project
