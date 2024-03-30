@@ -15,6 +15,16 @@ class ParametricPolicy(nn.Module):
         x = self.fc2(x)
         return x
 
+    def add_policy(self, other):
+        """
+        Adds the parameters of another ParametricPolicy instance to this one.
+        Assumes both policies have the same architecture.
+        """
+        # Iterate through the parameters of both models
+        for param_self, param_other in zip(self.parameters(), other.parameters()):
+            # Add the parameters directly
+            param_self.data += param_other.data
+
 #Uses tanh to limit the output between -1 and 1
 class AffineThrottlePolicy(ParametricPolicy):
 
