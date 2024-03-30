@@ -202,7 +202,7 @@ def run_zeroth_order_experiment(project_name, num_runs, num_generations, num_epi
   print(f'Alpha: {alpha}')
   print(f'Max steps: {max_steps}')
   # Ensure results directory exists
-  results_dir = os.path.join('results/population', project_name)
+  results_dir = os.path.join('results/zeroth', project_name)
   if not os.path.exists(results_dir):
     os.makedirs(results_dir)
   # Make a file called config.txt that stores num_runs, num_generations, N, and sigma
@@ -234,11 +234,14 @@ def run_zeroth_order_experiment(project_name, num_runs, num_generations, num_epi
       p_plus_score, p_min_score = rewards
       # A sort of gradient of θ, that we did not have to compute, is now given by “0.5 × (score of θ+ -
       # score of θ-) × θ+”.
-      # Calculate this gradient
-      gradient = 0.5 * (p_plus_score - p_min_score) * p_plus
+      # Calculate this gradient, we already apply alpha here
+      gradient = alpha * (0.5 * (p_plus_score - p_min_score))
+      #Move the positive perturbation in the direction of the gradient
+      for param in p_plus.parameters():
+        param.data *= gradient
       #Move θ, the parameters of the policy, in the direction of the gradient.
       #The step size is α, and the direction is the gradient.
-      policy += alpha * gradient
+      policy.add_policy(p_plus)
       # Evaluate the new policy
       policy_reward = evaluate_policy(policy, num_episodes, max_steps)
       print(f'Generation {gen + 1}: Reward: {policy_reward}')
@@ -308,9 +311,9 @@ def read_project(project_name, single_run=True, type='population'):
   #   std_rewards = np.array([float(value) for value in file.read().split(',')])
   config = None
   if type == 'population':
-    config = (num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best)
+    config = ('population', num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best)
   elif type == 'zeroth':
-    config = (num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
+    config = ('zeroth', num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
 
 
   return average_rewards, config
@@ -337,6 +340,8 @@ if __name__ == '__main__':
   alpha = 0.001
   run_zeroth_order_experiment('lunar_lander_zeroth_order_test', num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
   total_rewards, config = read_project('lunar_lander_zeroth_order_test', type='zeroth')
+  print(total_rewards)
+  plot_rewards(total_rewards, config)
 
   # run_population_experiment('lunar_lander_optimal_1eval_20_runs_test', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
   # total_rewards, config = read_project(
@@ -365,7 +370,7 @@ if __name__ == '__main__':
   #   # print(f'Project: {project_name}')
   #   # print(f'Average Rewards: {average_rewards}')
   #   # print(f'Configuration: {config}')
-  #   plot_rewards(average_rewards, sigma, N, num_generations, num_episodes, max_steps, k)
+  #   plot_rewards(average_rewards, sigma, N, num_episodes, max_steps, k)
   # total_rewards, _, config = read_project(
   #   'lunar_lander_tanh')
   # print(config)
