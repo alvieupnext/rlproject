@@ -1,7 +1,13 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def plot_rewards(average_total_rewards, sigma, N, num_generations, num_episodes, max_steps, k):
+def plot_rewards(average_total_rewards, config):
+  #Get the first element of the config file
+  type = config[0]
+  if type == 'population':
+    num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best = config[1:]
+  else:
+    num_runs, num_generations, num_episodes, sigma, alpha, max_steps = config[1:]
   sns.set(style='whitegrid')  # Set a style to make the plot look nicer
 
   plt.figure(figsize=(10, 6))  # Set the figure size for better readability
@@ -12,7 +18,10 @@ def plot_rewards(average_total_rewards, sigma, N, num_generations, num_episodes,
   plt.xlabel('Generation', fontsize=14, fontweight='bold', color='navy')  # Customize the x-label
   plt.ylabel('Reward', fontsize=14, fontweight='bold', color='navy')  # Customize the y-label
   episode_text = f'{num_episodes} episodes' if num_episodes > 1 else f'{num_episodes} episode'
-  title = f'Average Reward ({episode_text}, {max_steps} max steps, {N} perturbations, sigma: {sigma}, top-{k})'
+  if type == 'population':
+    title = f'Average Reward ({episode_text}, {max_steps} max steps, {N} perturbations, sigma: {sigma}, top-{k})'
+  else:
+    title = f'Average Reward ({episode_text}, {max_steps} max steps, sigma: {sigma}, alpha: {alpha})'
   plt.title(
     title,
     fontsize=16, fontweight='bold', color='darkred')
