@@ -124,7 +124,7 @@ def average_top_k_policies(policies, rewards, k):
   return average_policy, best_reward
 
 
-def run_experiment(project_name, num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best=True):
+def run_population_experiment(project_name, num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best=True):
   print(f'Running experiment for project {project_name}')
   print(f'Number of runs: {num_runs}')
   print(f'Number of generations: {num_generations}')
@@ -135,7 +135,7 @@ def run_experiment(project_name, num_runs, num_generations, num_episodes, N, sig
   print(f'Max steps: {max_steps}')
   print(f'Keep previous best: {keep_previous_best}')
   # Ensure results directory exists
-  results_dir = os.path.join('results', project_name)
+  results_dir = os.path.join('results/population', project_name)
   if not os.path.exists(results_dir):
     os.makedirs(results_dir)
   # Make a file called config.txt that stores num_runs, num_generations, N, and sigma
@@ -198,7 +198,7 @@ def run_experiment(project_name, num_runs, num_generations, num_episodes, N, sig
   return average_total_rewards
 
 
-def read_project(project_name):
+def read_project(project_name, single_run=True, type='population'):
   """
   Reads and returns the average and standard deviation of rewards
   for a given project.
@@ -210,10 +210,13 @@ def read_project(project_name):
       tuple: A tuple containing two numpy arrays, the first being the average
       rewards and the second being the standard deviation of rewards.
   """
-  results_dir = os.path.join('results', project_name)
+  results_dir = os.path.join(f'results/{type}', project_name)
   config_file_path = os.path.join(results_dir, 'config.txt')
   # Placeholder, read instead from run0.txt
-  average_file_path = os.path.join(results_dir, 'run0.txt')
+  if single_run:
+    average_file_path = os.path.join(results_dir, 'run0.txt')
+  else:
+    average_file_path = os.path.join(results_dir, 'summary_average.txt')
   std_file_path = os.path.join(results_dir, 'summary_std.txt')
 
   # Read configuration
@@ -243,8 +246,13 @@ def read_project(project_name):
     average_rewards = np.array([float(value) for value in file.read().split(',')])
 
   # # Read standard deviation of rewards
+  if not single_run:
+    with open(std_file_path, 'r') as file:
+      std_rewards = np.array([float(value) for value in file.read().split(',')])
+      return average_rewards, std_rewards, (num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best)
   # with open(std_file_path, 'r') as file:
   #   std_rewards = np.array([float(value) for value in file.read().split(',')])
+
 
   return average_rewards, (num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best)
 
@@ -267,7 +275,7 @@ if __name__ == '__main__':
   N = 20
   sigma = 0.01
   k = 1
-  run_experiment('lunar_lander_optimal_1eval_20_runs', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
+  run_population_experiment('lunar_lander_optimal_1eval_20_runs_test', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
   # total_rewards, config = read_project(
   #   'lunar_lander_optimal_1eval_20_runs')
   # print(len(total_rewards))

@@ -1,4 +1,4 @@
-from population import run_experiment, generate_project_name
+from population import run_population_experiment, generate_project_name
 import ray
 
 # The various hyperparameters
@@ -14,7 +14,7 @@ num_runs = 1
 #Make a function that returns a ray remote, it should just call run experiment with a config
 @ray.remote
 def run_experiment_ray(config):
-    return run_experiment(*config)
+    return run_population_experiment(*config)
 
 #Make a function that will generate all the configs
 def generate_configs():
