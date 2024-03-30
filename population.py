@@ -332,18 +332,26 @@ def generate_project_name(num_runs, num_generations, num_episodes, N, sigma, k, 
 
 if __name__ == '__main__':
   # Train the policy
+  # num_episodes = 20
+  # num_generations = 2000
+  # num_runs = 10
+  # max_steps = 500
+  # N = 10
+  # sigma = 0.01
+  # k = 1
+  # alpha = 0.001
   num_episodes = 20
   num_generations = 2000
-  num_runs = 10
+  num_runs = 1
   max_steps = 500
   N = 10
-  sigma = 0.01
+  sigma = 0.5
   k = 1
   alpha = 0.001
-  run_population_experiment('lunar_lander_optimal', num_runs, num_generations, num_episodes, N,
-                            sigma, k, max_steps)
-  # run_zeroth_order_experiment('lunar_lander_zeroth_order_test3', num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
-  # total_rewards, config = read_project('lunar_lander_10_eval_10_pertubs', type='population')
+  # run_population_experiment('lunar_lander_optimal', num_runs, num_generations, num_episodes, N,
+  #                           sigma, k, max_steps)
+  run_zeroth_order_experiment('lunar_lander_zeroth_order', num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
+  # total_rewards, config = read_project('lunar_lander_zeroth_order_test4', type='population')
   # print(total_rewards)
   # plot_rewards(total_rewards, config)
 
