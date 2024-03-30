@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def plot_rewards(project_name, average_total_rewards, sigma, N, num_generations, num_episodes):
+def plot_rewards(average_total_rewards, sigma, N, num_generations, num_episodes, max_steps, k):
   sns.set(style='whitegrid')  # Set a style to make the plot look nicer
 
   plt.figure(figsize=(10, 6))  # Set the figure size for better readability
@@ -11,10 +11,11 @@ def plot_rewards(project_name, average_total_rewards, sigma, N, num_generations,
 
   plt.xlabel('Generation', fontsize=14, fontweight='bold', color='navy')  # Customize the x-label
   plt.ylabel('Reward', fontsize=14, fontweight='bold', color='navy')  # Customize the y-label
+  episode_text = f'{num_episodes} episodes' if num_episodes > 1 else f'{num_episodes} episode'
+  title = f'Average Reward ({episode_text}, {max_steps} max steps, {N} perturbations, sigma: {sigma}, top-{k})'
   plt.title(
-    f'Reward over Generations (sigma: {sigma}, {N} perturbations, {num_generations} generations, {num_episodes} episodes)',
+    title,
     fontsize=16, fontweight='bold', color='darkred')
-  plt.suptitle(project_name, fontsize=16, fontweight='bold', color='darkred')
 
 
   plt.xticks(fontsize=12)  # Customize the x-ticks
@@ -26,7 +27,7 @@ def plot_rewards(project_name, average_total_rewards, sigma, N, num_generations,
 
   # Save the plot
   plt.savefig(
-    f'Reward over Generations (sigma: {sigma}, {N} perturbations, {num_generations} generations, {num_episodes} episodes).pdf',
+    f'{title}.pdf',
     format='pdf', dpi=300)  # Save the plot to a file
 
   plt.show()
