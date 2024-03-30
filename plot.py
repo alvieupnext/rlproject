@@ -19,9 +19,9 @@ def plot_rewards(average_total_rewards, config):
   plt.ylabel('Reward', fontsize=14, fontweight='bold', color='navy')  # Customize the y-label
   episode_text = f'{num_episodes} episodes' if num_episodes > 1 else f'{num_episodes} episode'
   if type == 'population':
-    title = f'Average Reward ({episode_text}, {max_steps} max steps, {N} perturbations, sigma: {sigma}, top-{k})'
+    title = f'Average Reward ({episode_text}, {max_steps} max steps, {N} perturbations, σ: {sigma}, top-{k})'
   else:
-    title = f'Average Reward ({episode_text}, {max_steps} max steps, sigma: {sigma}, alpha: {alpha})'
+    title = f'Average Reward ({episode_text}, {max_steps} max steps, σ: {sigma}, α: {alpha})'
   plt.title(
     title,
     fontsize=16, fontweight='bold', color='darkred')

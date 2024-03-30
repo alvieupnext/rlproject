@@ -301,19 +301,21 @@ def read_project(project_name, single_run=True, type='population'):
   # Read average rewards
   with open(average_file_path, 'r') as file:
     average_rewards = np.array([float(value) for value in file.read().split(',')])
-
-  # # Read standard deviation of rewards
-  if not single_run:
-    with open(std_file_path, 'r') as file:
-      std_rewards = np.array([float(value) for value in file.read().split(',')])
-      return average_rewards, std_rewards, (num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best)
-  # with open(std_file_path, 'r') as file:
-  #   std_rewards = np.array([float(value) for value in file.read().split(',')])
   config = None
   if type == 'population':
     config = ('population', num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best)
   elif type == 'zeroth':
     config = ('zeroth', num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
+
+  # # Read standard deviation of rewards
+  if not single_run:
+    with open(std_file_path, 'r') as file:
+      std_rewards = np.array([float(value) for value in file.read().split(',')])
+      return average_rewards, std_rewards, config
+  # with open(std_file_path, 'r') as file:
+  #   std_rewards = np.array([float(value) for value in file.read().split(',')])
+
+
 
 
   return average_rewards, config
@@ -330,122 +332,21 @@ def generate_project_name(num_runs, num_generations, num_episodes, N, sigma, k, 
 
 if __name__ == '__main__':
   # Train the policy
-  num_episodes = 1
+  num_episodes = 10
   num_generations = 2000
   num_runs = 1
   max_steps = 500
-  N = 20
+  N = 10
   sigma = 0.01
   k = 1
   alpha = 0.001
-  run_zeroth_order_experiment('lunar_lander_zeroth_order_test', num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
-  total_rewards, config = read_project('lunar_lander_zeroth_order_test', type='zeroth')
-  print(total_rewards)
-  plot_rewards(total_rewards, config)
+  run_population_experiment('lunar_lander_10_eval_10_pertubs', num_runs, num_generations, num_episodes, N,
+                            sigma, k, max_steps)
+  # run_zeroth_order_experiment('lunar_lander_zeroth_order_test3', num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
+  # total_rewards, config = read_project('lunar_lander_10_eval_10_pertubs', type='population')
+  # print(total_rewards)
+  # plot_rewards(total_rewards, config)
 
   # run_population_experiment('lunar_lander_optimal_1eval_20_runs_test', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
   # total_rewards, config = read_project(
   #   'lunar_lander_optimal_1eval_20_runs')
-  # print(len(total_rewards))
-  # num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best = config
-  # plot_rewards(total_rewards, sigma, N, num_generations, num_episodes, max_steps, k)
-  # Get all folders in the results directory, that start with ll
-  # project_names = [folder for folder in os.listdir('results') if folder.startswith('ll')]
-  # # Get the average rewards and standard deviations for each project
-  # for project_name in project_names:
-  #   average_rewards, config = read_project(project_name)
-  #   num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best = config
-  #   # Take the average of the rewards
-  #   average = np.mean(average_rewards)
-  #   print(f'Project: {project_name}, Average Reward: {average}')
-  #   # #Get the average of the second half of the rewards
-  #   # average = np.mean(average_rewards[len(average_rewards)//2:])
-  #   # print(f'Project: {project_name}, Second Half Average Reward: {average}')
-  #   # #Get the average of the last 100 rewards
-  #   # average = np.mean(average_rewards[-100:])
-  #   # print(f'Project: {project_name}, Last 100 Average Reward: {average}')
-  #   #If the overall average is lower than 40
-  #   if max_steps > 5001:
-  #     continue
-  #   # print(f'Project: {project_name}')
-  #   # print(f'Average Rewards: {average_rewards}')
-  #   # print(f'Configuration: {config}')
-  #   plot_rewards(average_rewards, sigma, N, num_episodes, max_steps, k)
-  # total_rewards, _, config = read_project(
-  #   'lunar_lander_tanh')
-  # print(config)
-  # run_experiment('lunar_lander_tanh', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
-  # num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best = config
-  # print(total_rewards)
-  # plot_rewards(total_rewards, sigma, N, num_generations, num_episodes)
-
-# total_rewards = []
-# # Start with a policy
-# # Initialize policy
-# for run in range(num_runs):
-#   policy = ParametricPolicy(input_size=state_dim,
-#                             hidden_size=128,
-#                             output_size=action_dim)
-#   run_rewards =[]
-#   #Evaluate the first policy
-#   policy_reward = evaluate_policy(policy)
-#   print(f'Generation {0}: Reward: {policy_reward}')
-#   #Add the reward to the list of rewards
-#   run_rewards.append(policy_reward)
-#   for gen in range(num_generations):
-#     # Get N amount of pertubations (remember that each N produces two pertubations)
-#     policies = generate_perturbed_policies(policy, N, sigma=sigma)
-#     #Add the original policy to the list of policies
-#     policies.append(policy)
-#     rewards = []
-#
-#     #We evaluate each policy
-#     for perturbed_policy in policies:
-#       policy_reward = evaluate_policy(perturbed_policy)
-#       #Add the policy reward to the list of rewards
-#       rewards.append(policy_reward)
-#     #Select the best policy
-#     best_policy = policies[np.argmax(rewards)]
-#     #Select the max reward
-#     best_reward = np.max(rewards)
-#     #Log per generation the best policy (index) and best reward
-#     print(f'Generation {gen +1}: Best Reward: {best_reward}, Best Policy: {np.argmax(rewards)}')
-#     #Get the top 5 policies
-#     top_policies = np.argsort(rewards)[-3:]
-#     #Reverse the order to get the best policies first
-#     top_policies = top_policies[::-1]
-#     #Get the top 10 rewards
-#     top_rewards = [rewards[i] for i in top_policies]
-#     #Print the top 10 policies and rewards
-#     print(f'Top Policies: {top_policies}')
-#     print(f'Top Rewards: {top_rewards}')
-#     #Form the average of the the 10 best rewards (by averaging all the weights/parameters)
-#     average_policy = copy.deepcopy(best_policy)
-#     weight = 1
-#     for i in range(1, 3):
-#       for param, avg_param in zip(policies[top_policies[i]].parameters(), average_policy.parameters()):
-#         avg_param.data += param.data * (1/(2*(i+1)))
-#         weight += (1/(2**i))
-#     for param in average_policy.parameters():
-#       param.data /= weight
-#     #Update the policy
-#     policy = average_policy
-#     #Add the best reward to the list of rewards
-#     run_rewards.append(best_reward)
-#   total_rewards.append(run_rewards)
-#
-# # Convert the rewards to a numpy array
-# total_rewards = np.array(total_rewards)
-# # Average the rewards over the number of runs
-# average_total_rewards = np.mean(total_rewards, axis=0)
-
-# Plot the rewards
-
-# args = Config(AgentModSAC, env_class=env_func, env_args=env_args)
-#
-# args.target_step = args.max_step
-# args.gamma = 0.99
-# args.eval_times = 2**5
-# args.random_seed = 2022
-#
-# train_agent(args)
