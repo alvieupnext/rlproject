@@ -125,7 +125,7 @@ def average_top_k_policies(policies, rewards, k):
 
 
 def run_population_experiment(project_name, num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best=True):
-  print(f'Running experiment for project {project_name}')
+  print(f'Running population method experiment for project {project_name}')
   print(f'Number of runs: {num_runs}')
   print(f'Number of generations: {num_generations}')
   print(f'Number of episodes: {num_episodes}')
@@ -169,11 +169,7 @@ def run_population_experiment(project_name, num_runs, num_generations, num_episo
       policies = generate_perturbed_policies(policy, N, sigma=sigma)
       if keep_previous_best:
         policies.append(policy)
-      rewards = []
-
-      for perturbed_policy in policies:
-        policy_reward = evaluate_policy(perturbed_policy, num_episodes, max_steps)
-        rewards.append(policy_reward)
+      rewards = [evaluate_policy(policy, num_episodes, max_steps) for policy in policies]
 
       average_policy, best_reward = average_top_k_policies(policies, rewards, k=k)
 
@@ -196,6 +192,62 @@ def run_population_experiment(project_name, num_runs, num_generations, num_episo
     f.write(','.join(map(str, std_total_rewards)))
 
   return average_total_rewards
+
+def run_zeroth_order_experiment(project_name, num_runs, num_generations, num_episodes, sigma, alpha, max_steps):
+  print(f'Running zeroth-order experiment for project {project_name}')
+  print(f'Number of runs: {num_runs}')
+  print(f'Number of generations: {num_generations}')
+  print(f'Number of episodes: {num_episodes}')
+  print(f'Sigma: {sigma}')
+  print(f'Alpha: {alpha}')
+  print(f'Max steps: {max_steps}')
+  # Ensure results directory exists
+  results_dir = os.path.join('results/population', project_name)
+  if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
+  # Make a file called config.txt that stores num_runs, num_generations, N, and sigma
+  with open(os.path.join(results_dir, 'config.txt'), 'w') as f:
+    f.write(f'num_runs: {num_runs}\n')
+    f.write(f'num_generations: {num_generations}\n')
+    f.write(f'sigma: {sigma}\n')
+    f.write(f'alpha: {alpha}\n')
+    f.write(f'num_episodes: {num_episodes}\n')
+    f.write(f'max_steps: {max_steps}\n')
+  total_rewards = []
+  for run in range(num_runs):
+    policy = AffineThrottlePolicy(input_size=state_dim, hidden_size=128, output_size=action_dim)
+    run_rewards = []
+    # Open the file in 'w' mode to clear it, then immediately close it.
+    with open(os.path.join(results_dir, f'run{run}.txt'), 'w') as f:
+      pass  # This will clear the file contents at the beginning of the run
+    policy_reward = evaluate_policy(policy, num_episodes, max_steps)
+    print(f'Generation 0: Reward: {policy_reward}')
+    run_rewards.append(policy_reward)
+    # Now open the file in append mode to start adding data
+    with open(os.path.join(results_dir, f'run{run}.txt'), 'a') as f:
+      f.write(f'{policy_reward}')  # Write the initial reward
+
+    for gen in range(num_generations):
+      pertubations = perturb_policy_zeroth_order(policy, sigma)
+      p_plus, p_min = pertubations
+      rewards = [evaluate_policy(policy, num_episodes, max_steps) for policy in pertubations]
+      p_plus_score, p_min_score = rewards
+      # A sort of gradient of θ, that we did not have to compute, is now given by “0.5 × (score of θ+ -
+      # score of θ-) × θ+”.
+      # Calculate this gradient
+      gradient = 0.5 * (p_plus_score - p_min_score) * p_plus
+      #Move θ, the parameters of the policy, in the direction of the gradient.
+      #The step size is α, and the direction is the gradient.
+      policy += alpha * gradient
+      # Evaluate the new policy
+      policy_reward = evaluate_policy(policy, num_episodes, max_steps)
+      print(f'Generation {gen + 1}: Reward: {policy_reward}')
+      run_rewards.append(policy_reward)
+      # Continue using append mode for subsequent writes within the same run
+      with open(os.path.join(results_dir, f'run{run}.txt'), 'a') as f:
+        f.write(f',{policy_reward}')  # Append the best_reward for this generation
+
+    total_rewards.append(run_rewards)
 
 
 def read_project(project_name, single_run=True, type='population'):
@@ -238,6 +290,8 @@ def read_project(project_name, single_run=True, type='population'):
         k = int(line.split(':')[-1])
       elif 'max_steps' in line:
         max_steps = int(line.split(':')[-1])
+      elif 'alpha' in line:
+        alpha = float(line.split(':')[-1])
 
 
 
@@ -252,9 +306,14 @@ def read_project(project_name, single_run=True, type='population'):
       return average_rewards, std_rewards, (num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best)
   # with open(std_file_path, 'r') as file:
   #   std_rewards = np.array([float(value) for value in file.read().split(',')])
+  config = None
+  if type == 'population':
+    config = (num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best)
+  elif type == 'zeroth':
+    config = (num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
 
 
-  return average_rewards, (num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best)
+  return average_rewards, config
 
 
 # run_experiment('lunar_lander_tanh', num_runs, num_generations, num_episodes, N, sigma, k)
@@ -270,12 +329,16 @@ if __name__ == '__main__':
   # Train the policy
   num_episodes = 1
   num_generations = 2000
-  num_runs = 30
+  num_runs = 1
   max_steps = 500
   N = 20
   sigma = 0.01
   k = 1
-  run_population_experiment('lunar_lander_optimal_1eval_20_runs_test', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
+  alpha = 0.001
+  run_zeroth_order_experiment('lunar_lander_zeroth_order_test', num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
+  total_rewards, config = read_project('lunar_lander_zeroth_order_test', type='zeroth')
+
+  # run_population_experiment('lunar_lander_optimal_1eval_20_runs_test', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
   # total_rewards, config = read_project(
   #   'lunar_lander_optimal_1eval_20_runs')
   # print(len(total_rewards))
