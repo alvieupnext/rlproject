@@ -323,11 +323,18 @@ def read_project(project_name, single_run=True, type='population'):
 
 # run_experiment('lunar_lander_tanh', num_runs, num_generations, num_episodes, N, sigma, k)
 #
-def generate_project_name(num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best):
-  title = f'll_{num_runs}_{num_generations}_{num_episodes}_{N}_{sigma}_{k}_{max_steps}_{keep_previous_best}'
-  if keep_previous_best:
-    title += '_kept'
-  return title
+def generate_project_name(config):
+  type = config[0]
+  if type == 'population':
+    _, num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best = config
+    title = f'll_{type}_{num_runs}_{num_generations}_{num_episodes}_{N}_{sigma}_{k}_{max_steps}'
+    if keep_previous_best:
+      title += '_kept'
+    return title
+  else:
+    _, num_runs, num_generations, num_episodes, sigma, alpha, max_steps = config
+    title = f'll_{type}_{num_runs}_{num_generations}_{num_episodes}_{sigma}_{alpha}_{max_steps}'
+    return title
 
 
 if __name__ == '__main__':
@@ -350,10 +357,10 @@ if __name__ == '__main__':
   alpha = 0.001
   # run_population_experiment('lunar_lander_optimal', num_runs, num_generations, num_episodes, N,
   #                           sigma, k, max_steps)
-  run_zeroth_order_experiment('lunar_lander_zeroth_order', num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
-  # total_rewards, config = read_project('lunar_lander_zeroth_order_test4', type='population')
-  # print(total_rewards)
-  # plot_rewards(total_rewards, config)
+  # run_zeroth_order_experiment('lunar_lander_zeroth_order', num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
+  total_rewards, config = read_project('lunar_lander_zeroth_order', type='zeroth')
+  print(total_rewards)
+  plot_rewards(total_rewards, config)
 
   # run_population_experiment('lunar_lander_optimal_1eval_20_runs_test', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
   # total_rewards, config = read_project(
