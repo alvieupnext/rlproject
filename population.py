@@ -349,7 +349,7 @@ if __name__ == '__main__':
   # alpha = 0.001
   num_episodes = 20
   num_generations = 2000
-  num_runs = 1
+  num_runs = 10
   max_steps = 500
   N = 10
   sigma = 0.5
@@ -357,10 +357,10 @@ if __name__ == '__main__':
   alpha = 0.001
   # run_population_experiment('lunar_lander_optimal', num_runs, num_generations, num_episodes, N,
   #                           sigma, k, max_steps)
-  # run_zeroth_order_experiment('lunar_lander_zeroth_order', num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
-  total_rewards, config = read_project('lunar_lander_zeroth_order', type='zeroth')
-  print(total_rewards)
-  plot_rewards(total_rewards, config)
+  run_zeroth_order_experiment('lunar_lander_zeroth_order_10_runs', num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
+  # total_rewards, config = read_project('lunar_lander_zeroth_order', type='zeroth')
+  # print(total_rewards)
+  # plot_rewards(total_rewards, config)
 
   # run_population_experiment('lunar_lander_optimal_1eval_20_runs_test', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
   # total_rewards, config = read_project(
