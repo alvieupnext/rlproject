@@ -251,6 +251,17 @@ def run_zeroth_order_experiment(project_name, num_runs, num_generations, num_epi
         f.write(f',{policy_reward}')  # Append the best_reward for this generation
 
     total_rewards.append(run_rewards)
+  total_rewards = np.array(total_rewards)
+  average_total_rewards = np.mean(total_rewards, axis=0)
+  std_total_rewards = np.std(total_rewards, axis=0)
+
+  # Write summary statistics to files
+  with open(os.path.join(results_dir, 'summary_average.txt'), 'w') as f:
+    f.write(','.join(map(str, average_total_rewards)))
+  with open(os.path.join(results_dir, 'summary_std.txt'), 'w') as f:
+    f.write(','.join(map(str, std_total_rewards)))
+
+  return average_total_rewards
 
 
 def read_project(project_name, single_run=True, type='population'):
@@ -320,6 +331,32 @@ def read_project(project_name, single_run=True, type='population'):
 
   return average_rewards, config
 
+#Generate the summary average and std files from a project
+def generate_summary(project_name, type='zeroth'):
+  #Locate the project
+  results_dir = os.path.join(f'results/{type}', project_name)
+  #Get all files that start with run and are a txt file
+  run_files = [file for file in os.listdir(results_dir) if file.startswith('run') and file.endswith('.txt')]
+  #From all run_files, get their rewards (delimited by commas)
+  rewards = []
+  for run_file in run_files:
+    with open(os.path.join(results_dir, run_file), 'r') as f:
+      rewards.append(np.array([float(reward) for reward in f.read().split(',')]))
+  #Get the average and std of the rewards
+  average_rewards = np.mean(rewards, axis=0)
+  std_rewards = np.std(rewards, axis=0)
+  #Write the average and std to the summary files
+  with open(os.path.join(results_dir, 'summary_average.txt'), 'w') as f:
+    f.write(','.join(map(str, average_rewards)))
+  with open(os.path.join(results_dir, 'summary_std.txt'), 'w') as f:
+    f.write(','.join(map(str, std_rewards)))
+
+
+
+
+
+
+
 
 # run_experiment('lunar_lander_tanh', num_runs, num_generations, num_episodes, N, sigma, k)
 #
@@ -357,10 +394,11 @@ if __name__ == '__main__':
   alpha = 0.001
   # run_population_experiment('lunar_lander_optimal', num_runs, num_generations, num_episodes, N,
   #                           sigma, k, max_steps)
-  run_zeroth_order_experiment('lunar_lander_zeroth_order_10_runs', num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
-  # total_rewards, config = read_project('lunar_lander_zeroth_order', type='zeroth')
+  # run_zeroth_order_experiment('lunar_lander_zeroth_order_10_runs', num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
+  # generate_summary('lunar_lander_zeroth_order_10_runs')
+  total_rewards, std_rewards, config = read_project('lunar_lander_zeroth_order_10_runs', type='zeroth', single_run=False)
   # print(total_rewards)
-  # plot_rewards(total_rewards, config)
+  plot_rewards(total_rewards, config, std_rewards)
 
   # run_population_experiment('lunar_lander_optimal_1eval_20_runs_test', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
   # total_rewards, config = read_project(
