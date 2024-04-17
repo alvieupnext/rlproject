@@ -29,11 +29,12 @@ def plot_rewards(average_total_rewards, config, std_rewards=None):
 
   plt.xlabel('Generation', fontsize=14, fontweight='bold', color='navy')  # Customize the x-label
   plt.ylabel('Reward', fontsize=14, fontweight='bold', color='navy')  # Customize the y-label
+  run_text = f'{num_runs} runs' if num_runs > 1 else f'{num_runs} run'
   episode_text = f'{num_episodes} episodes' if num_episodes > 1 else f'{num_episodes} episode'
   if type == 'population':
-    title = f'Average Reward ({episode_text}, {max_steps} max steps, {N} perturbations, σ: {sigma}, top-{k})'
+    title = f'Reward Curve ({run_text}, {episode_text}, {max_steps} max steps, {N} perturbations, σ: {sigma}, CI: 95%)'
   else:
-    title = f'Average Reward ({episode_text}, {max_steps} max steps, σ: {sigma}, α: {alpha})'
+    title = f'Reward Curve ({run_text}, {episode_text}, {max_steps} max steps, σ: {sigma}, α: {alpha}, CI: 95%)'
   plt.title(
     title,
     fontsize=16, fontweight='bold', color='darkred')
@@ -53,7 +54,7 @@ def plot_rewards(average_total_rewards, config, std_rewards=None):
 
   plt.show()
 
-def plot_reward_curves(rewards, configs):
+def plot_reward_curves(rewards, configs, std_rewards=None):
   # Make a figure and a line per configuration
   sns.set(style='whitegrid')  # Set a style to make the plot look nicer
 
@@ -62,7 +63,10 @@ def plot_reward_curves(rewards, configs):
   #From the first config, get the number of runs, generation count and the number of episodes
   config = configs[0]
   num_runs, num_generations, num_episodes = config[1:4]
-  plt.title(f'Average Reward ({num_runs} runs, {num_episodes} evaluation episodes)', fontsize=16, fontweight='bold', color='darkred')
+  run_text = f'{num_runs} runs' if num_runs > 1 else f'{num_runs} run'
+  episode_text = f'{num_episodes} evaluation episodes' if num_episodes > 1 else f'{num_episodes} evaluation episode'
+
+  plt.title(f'Reward Curves ({run_text}, {episode_text})', fontsize=16, fontweight='bold', color='darkred')
 
   for i, (average_total_rewards, config) in enumerate(zip(rewards, configs)):
     #Get the first element of the config file
@@ -75,6 +79,11 @@ def plot_reward_curves(rewards, configs):
       configuration_name = f'Zeroth Order (σ: {sigma}, α: {alpha}, max steps: {max_steps})'
     # Plot the average rewards
     plt.plot(average_total_rewards, label=configuration_name)
+    if std_rewards is not None:
+      #Plot the 95% confidence interval around the average
+      upper_bound = average_total_rewards + 1.96 * std_rewards[i] / (num_runs ** 0.5)
+      lower_bound = average_total_rewards - 1.96 * std_rewards[i] / (num_runs ** 0.5)
+      plt.fill_between(range(len(average_total_rewards)), lower_bound, upper_bound, alpha=0.5)
 
   plt.legend(fontsize=12)  # Add a legend to the plot
 
