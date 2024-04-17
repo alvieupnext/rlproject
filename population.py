@@ -110,8 +110,9 @@ def run_population_experiment(project_name, num_runs, num_generations, num_episo
     run_rewards.append(policy_reward)
     # Now open the file in append mode to start adding data
     with open(os.path.join(results_dir, f'run{run}.txt'), 'a') as f:
-      for reward in policy_reward:
-        f.write(f'{reward}') # Write the initial reward
+      # Convert all elements in best_rewards to string and join them with a comma
+      reward_string = ','.join(map(str, policy_reward))
+      f.write(reward_string)
 
     for gen in range(num_generations):
       print(f'Generation {gen + 1}')
@@ -127,8 +128,8 @@ def run_population_experiment(project_name, num_runs, num_generations, num_episo
       # Continue using append mode for subsequent writes within the same run
       with open(os.path.join(results_dir, f'run{run}.txt'), 'a') as f:
         #Write every reward of best_rewards to the file
-        for best_reward in best_rewards:
-          f.write(f',{best_reward}')
+        for episode_reward in best_rewards:
+          f.write(f',{episode_reward}')
 
     total_rewards.append(run_rewards)
   return total_rewards

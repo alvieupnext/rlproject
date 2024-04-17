@@ -49,18 +49,22 @@ def run_zeroth_order_experiment(project_name, num_runs, num_generations, num_epi
     # Open the file in 'w' mode to clear it, then immediately close it.
     with open(os.path.join(results_dir, f'run{run}.txt'), 'w') as f:
       pass  # This will clear the file contents at the beginning of the run
-    policy_reward = evaluate_policy(policy, num_episodes, max_steps)
+    policy_reward = evaluate_policy(env, policy, num_episodes, max_steps)
     print(f'Generation 0: Reward: {policy_reward}')
     run_rewards.append(policy_reward)
     # Now open the file in append mode to start adding data
     with open(os.path.join(results_dir, f'run{run}.txt'), 'a') as f:
-      f.write(f'{policy_reward}')  # Write the initial reward
+      # Convert all elements in best_rewards to string and join them with a comma
+      reward_string = ','.join(map(str, policy_reward))
+      f.write(reward_string)
 
     for gen in range(num_generations):
       pertubations = perturb_policy_zeroth_order(policy, sigma)
       p_plus, p_min = pertubations
-      rewards = [evaluate_policy(policy, num_episodes, max_steps) for policy in pertubations]
-      p_plus_score, p_min_score = rewards
+      rewards = [evaluate_policy(env, policy, num_episodes, max_steps) for policy in pertubations]
+      #The rewards are arrays of the evaluation episode rewards
+      mean_rewards = np.mean(rewards, axis=1)
+      p_plus_score, p_min_score = mean_rewards
       # A sort of gradient of θ, that we did not have to compute, is now given by “0.5 × (score of θ+ -
       # score of θ-) × θ+”.
       # Calculate this gradient, we already apply alpha here
@@ -77,8 +81,8 @@ def run_zeroth_order_experiment(project_name, num_runs, num_generations, num_epi
       run_rewards.append(policy_reward)
       # Continue using append mode for subsequent writes within the same run
       with open(os.path.join(results_dir, f'run{run}.txt'), 'a') as f:
-        f.write(f',{policy_reward}')  # Append the best_reward for this generation
-
+        for episode_reward in policy_reward:
+          f.write(f',{episode_reward}')
     total_rewards.append(run_rewards)
   return total_rewards
 
