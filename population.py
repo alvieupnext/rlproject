@@ -6,7 +6,7 @@ from elegantrl.agents import AgentModSAC
 from elegantrl.train.config import get_gym_env_args, Config
 from elegantrl.train.run import *
 
-from plot import plot_rewards
+from plot import plot_rewards, plot_reward_curves
 from policy import ParametricPolicy, AffineThrottlePolicy
 from pertubation import *
 
@@ -42,8 +42,6 @@ np.random.seed(seed)
 state_dim = 8
 action_dim = 2
 gamma = 0.99
-
-
 
 def evaluate_policy(policy, num_episodes, max_steps):
   policy_reward = 0
@@ -179,19 +177,7 @@ def run_population_experiment(project_name, num_runs, num_generations, num_episo
         f.write(f',{best_reward}')  # Append the best_reward for this generation
 
     total_rewards.append(run_rewards)
-
-  # Convert to numpy array for analysis
-  total_rewards = np.array(total_rewards)
-  average_total_rewards = np.mean(total_rewards, axis=0)
-  std_total_rewards = np.std(total_rewards, axis=0)
-
-  # Write summary statistics to files
-  with open(os.path.join(results_dir, 'summary_average.txt'), 'w') as f:
-    f.write(','.join(map(str, average_total_rewards)))
-  with open(os.path.join(results_dir, 'summary_std.txt'), 'w') as f:
-    f.write(','.join(map(str, std_total_rewards)))
-
-  return average_total_rewards
+  return total_rewards
 
 def run_zeroth_order_experiment(project_name, num_runs, num_generations, num_episodes, sigma, alpha, max_steps):
   print(f'Running zeroth-order experiment for project {project_name}')
@@ -251,17 +237,7 @@ def run_zeroth_order_experiment(project_name, num_runs, num_generations, num_epi
         f.write(f',{policy_reward}')  # Append the best_reward for this generation
 
     total_rewards.append(run_rewards)
-  total_rewards = np.array(total_rewards)
-  average_total_rewards = np.mean(total_rewards, axis=0)
-  std_total_rewards = np.std(total_rewards, axis=0)
-
-  # Write summary statistics to files
-  with open(os.path.join(results_dir, 'summary_average.txt'), 'w') as f:
-    f.write(','.join(map(str, average_total_rewards)))
-  with open(os.path.join(results_dir, 'summary_std.txt'), 'w') as f:
-    f.write(','.join(map(str, std_total_rewards)))
-
-  return average_total_rewards
+  return total_rewards
 
 
 def read_project(project_name, single_run=True, type='population'):
@@ -396,9 +372,15 @@ if __name__ == '__main__':
   #                           sigma, k, max_steps)
   # run_zeroth_order_experiment('lunar_lander_zeroth_order_10_runs', num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
   # generate_summary('lunar_lander_zeroth_order_10_runs')
-  total_rewards, std_rewards, config = read_project('lunar_lander_zeroth_order_10_runs', type='zeroth', single_run=False)
+  # total_rewards, std_rewards, config = read_project('lunar_lander_zeroth_order_10_runs', type='zeroth', single_run=False)
+  # generate_summary('lunar_lander_optimal', type='population')
+  population_rewards, population_std_rewards, population_config = read_project('lunar_lander_optimal',
+                                                                               type='population', single_run=False)
+  zeroth_rewards, zeroth_std_rewards, zeroth_config = read_project('lunar_lander_zeroth_order_10_runs', type='zeroth',
+                                                    single_run=False)
   # print(total_rewards)
-  plot_rewards(total_rewards, config, std_rewards)
+  plot_reward_curves([population_rewards, zeroth_rewards], [population_config, zeroth_config],
+                     [population_std_rewards, zeroth_std_rewards])
 
   # run_population_experiment('lunar_lander_optimal_1eval_20_runs_test', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
   # total_rewards, config = read_project(
