@@ -120,7 +120,6 @@ def run_population_experiment(project_name, num_runs, num_generations, num_episo
       if keep_previous_best:
         policies.append(policy)
       rewards = [evaluate_policy(env, policy, num_episodes, max_steps) for policy in policies]
-      print(rewards)
 
       average_policy, best_rewards = average_top_k_policies(policies, rewards, k=k)
 
