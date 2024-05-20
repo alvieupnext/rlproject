@@ -98,7 +98,7 @@ def run_population_experiment(project_name, num_runs, num_generations, num_episo
     f.write(f'keep_previous_best: {keep_previous_best}\n')
 
   total_rewards = []
-  for run in range(7, num_runs):
+  for run in range(num_runs):
     policy = AffineThrottlePolicy(input_size=state_dim, hidden_size=128, output_size=action_dim)
     run_rewards = []
     # Open the file in 'w' mode to clear it, then immediately close it.
@@ -151,10 +151,10 @@ if __name__ == '__main__':
   num_generations = 1500
   num_runs = 10
   max_steps = 500
-  N = 9
-  sigma = 0.01
+  N = 10
+  sigma = 0.5
   k = 1
-  experiment = 'lunar_lander_population_all_ep'
+  experiment = 'lunar_lander_population_all_ep_v2'
   run_population_experiment(experiment, num_runs, num_generations, num_episodes, N,
                             sigma, k, max_steps)
   generate_summary(experiment, type='population')
