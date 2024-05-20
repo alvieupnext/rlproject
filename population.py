@@ -106,13 +106,13 @@ def run_population_experiment(project_name, num_runs, num_generations, num_episo
       pass  # This will clear the file contents at the beginning of the run
 
     policy_reward = evaluate_policy(env, policy, num_episodes, max_steps)
-    print(f'Generation 0: Reward: {policy_reward}')
+    print(f'Generation 0 Reward: {policy_reward}')
     run_rewards.append(policy_reward)
     # Now open the file in append mode to start adding data
-    with open(os.path.join(results_dir, f'run{run}.txt'), 'a') as f:
-      # Convert all elements in best_rewards to string and join them with a comma
-      reward_string = ','.join(map(str, policy_reward))
-      f.write(reward_string)
+    # with open(os.path.join(results_dir, f'run{run}.txt'), 'a') as f:
+    #   # Convert all elements in best_rewards to string and join them with a comma
+    #   reward_string = ','.join(map(str, policy_reward))
+    #   f.write(reward_string)
 
     for gen in range(num_generations):
       print(f'Generation {gen + 1}')
@@ -121,13 +121,17 @@ def run_population_experiment(project_name, num_runs, num_generations, num_episo
         policies.append(policy)
       rewards = [evaluate_policy(env, policy, num_episodes, max_steps) for policy in policies]
 
+      #Rewards contains N arrays, make them a single array
+      all_rewards = [num for sublist in rewards for num in sublist]
+
+
       average_policy, best_rewards = average_top_k_policies(policies, rewards, k=k)
 
       policy = average_policy
       # Continue using append mode for subsequent writes within the same run
       with open(os.path.join(results_dir, f'run{run}.txt'), 'a') as f:
         #Write every reward of best_rewards to the file
-        for episode_reward in best_rewards:
+        for episode_reward in all_rewards:
           f.write(f',{episode_reward}')
 
     total_rewards.append(run_rewards)
@@ -144,19 +148,19 @@ if __name__ == '__main__':
   # k = 1
   # alpha = 0.001
   num_episodes = 20
-  num_generations = 2000
+  num_generations = 1500
   num_runs = 10
   max_steps = 500
-  N = 10
-  sigma = 0.5
+  N = 9
+  sigma = 0.01
   k = 1
-  experiment = 'lunar_lander_population_ep_saved'
+  experiment = 'lunar_lander_population_all_ep'
   run_population_experiment(experiment, num_runs, num_generations, num_episodes, N,
                             sigma, k, max_steps)
-  generate_summary(experiment)
-  population_rewards, population_std_rewards, population_config = read_project(experiment,
-                                                                               type='population', single_run=False)
-  plot_rewards(population_rewards, population_config, population_std_rewards)
+  generate_summary(experiment, type='population')
+  # population_rewards, population_std_rewards, population_config = read_project(experiment,
+  #                                                                              type='population', single_run=False)
+  # plot_rewards(population_rewards, population_config, population_std_rewards)
 
   # run_population_experiment('lunar_lander_optimal_1eval_20_runs_test', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
   # total_rewards, config = read_project(
