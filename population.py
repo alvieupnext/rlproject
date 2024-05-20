@@ -151,7 +151,7 @@ if __name__ == '__main__':
   num_generations = 1500
   num_runs = 10
   max_steps = 500
-  N = 10
+  N = 9
   sigma = 0.5
   k = 1
   experiment = 'lunar_lander_population_all_ep_v2'
