@@ -5,18 +5,16 @@ from plot import plot_rewards, plot_reward_curves
 from policy import ParametricPolicy, AffineThrottlePolicy
 from pertubation import *
 from utils import evaluate_policy, read_project, generate_summary
+import ray
 
 gym.logger.set_level(40)  # Block warning
 
-# Initialize the environment using the provided utility functions and arguments
-env = gym.make('LunarLanderContinuous-v2')
-
-seed = 42
-
-# Seed the environment for reproducibility
-env.seed(seed)
-torch.manual_seed(seed)
-np.random.seed(seed)
+# seed = 42
+#
+# # Seed the environment for reproducibility
+# env.seed(seed)
+# torch.manual_seed(seed)
+# np.random.seed(seed)
 
 state_dim = 8
 action_dim = 2
@@ -96,65 +94,54 @@ def run_population_experiment(project_name, num_runs, num_generations, num_episo
     f.write(f'k: {k}\n')
     f.write(f'max_steps: {max_steps}\n')
     f.write(f'keep_previous_best: {keep_previous_best}\n')
-
-  total_rewards = []
+  remotes = []
   for run in range(num_runs):
-    policy = AffineThrottlePolicy(input_size=state_dim, hidden_size=128, output_size=action_dim)
-    run_rewards = []
+    remotes.append(population_experiment_run.remote(results_dir, run, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best))
 
-    policy_reward = evaluate_policy(env, policy, num_episodes, max_steps)
-    print(f'Generation 0 Reward: {policy_reward}')
-    run_rewards.append(policy_reward)
-    # Now open the file in append mode to start adding data
-    # with open(os.path.join(results_dir, f'run{run}.txt'), 'a') as f:
-    #   # Convert all elements in best_rewards to string and join them with a comma
-    #   reward_string = ','.join(map(str, policy_reward))
-    #   f.write(reward_string)
+  ray.get(remotes)
 
-    for gen in range(num_generations):
-      print(f'Generation {gen + 1}')
-      policies = generate_perturbed_policies(policy, N, sigma=sigma)
-      if keep_previous_best:
-        policies.append(policy)
-      rewards = [evaluate_policy(env, policy, num_episodes, max_steps) for policy in policies]
+@ray.remote
+def population_experiment_run(results_dir, run, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best=True):
+  # Initialize the environment using the provided utility functions and arguments
+  env = gym.make('LunarLanderContinuous-v2')
+  policy = AffineThrottlePolicy(input_size=state_dim, hidden_size=128, output_size=action_dim)
+  run_rewards = []
 
-      #Rewards contains N arrays, make them a single array
-      all_rewards = [num for sublist in rewards for num in sublist]
+  policy_reward = evaluate_policy(env, policy, num_episodes, max_steps)
+  print(f'Generation 0 Reward: {policy_reward}')
+  run_rewards.append(policy_reward)
 
+  for gen in range(num_generations):
+    print(f'Generation {gen + 1}')
+    policies = generate_perturbed_policies(policy, N, sigma=sigma)
+    if keep_previous_best:
+      policies.append(policy)
+    rewards = [evaluate_policy(env, policy, num_episodes, max_steps) for policy in policies]
 
-      average_policy, best_rewards = average_top_k_policies(policies, rewards, k=k)
+    # Rewards contains N arrays, make them a single array
+    all_rewards = [num for sublist in rewards for num in sublist]
 
-      policy = average_policy
-      # Continue using append mode for subsequent writes within the same run
-      with open(os.path.join(results_dir, f'run{run}.txt'), 'a') as f:
-        #Write every reward of best_rewards to the file
-        for episode_reward in all_rewards:
-          f.write(f',{episode_reward}')
+    average_policy, best_rewards = average_top_k_policies(policies, rewards, k=k)
 
-    total_rewards.append(run_rewards)
-  return total_rewards
+    policy = average_policy
+    # Continue using append mode for subsequent writes within the same run
+    with open(os.path.join(results_dir, f'run{run}.txt'), 'a') as f:
+      # Write every reward of best_rewards to the file
+      for episode_reward in all_rewards:
+        f.write(f',{episode_reward}')
 
 if __name__ == '__main__':
-  # Train the policy
-  # num_episodes = 20
-  # num_generations = 2000
-  # num_runs = 10
-  # max_steps = 500
-  # N = 10
-  # sigma = 0.01
-  # k = 1
-  # alpha = 0.001
   num_episodes = 20
-  num_generations = 1
+  num_generations = 750
   num_runs = 10
   max_steps = 500
   N = 9
   sigma = 0.5
   k = 1
-  experiment = 'lunar_lander_population_all_ep_v3'
+  experiment = 'lunar_lander_population_ray_test'
   run_population_experiment(experiment, num_runs, num_generations, num_episodes, N,
                             sigma, k, max_steps)
-  generate_summary(experiment, type='population')
+  # generate_summary(experiment, type='population')
   # population_rewards, population_std_rewards, population_config = read_project(experiment,
   #                                                                              type='population', single_run=False)
   # plot_rewards(population_rewards, population_config, population_std_rewards)
