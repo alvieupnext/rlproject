@@ -54,7 +54,7 @@ def plot_rewards(average_total_rewards, config, std_rewards=None):
 
   plt.show()
 
-def plot_reward_curves(rewards, configs, std_rewards=None, std=True):
+def plot_reward_curves(rewards, configs, std_rewards=None, std=True, ep_saved=True):
   # Make a figure and a line per configuration
   sns.set(style='whitegrid')  # Set a style to make the plot look nicer
 
@@ -66,7 +66,7 @@ def plot_reward_curves(rewards, configs, std_rewards=None, std=True):
   run_text = f'{num_runs} runs' if num_runs > 1 else f'{num_runs} run'
   episode_text = f'{num_episodes} evaluation episodes' if num_episodes > 1 else f'{num_episodes} evaluation episode'
 
-  title = f'Reward Curves ({run_text}, {episode_text})'
+  title = f'Reward Curves ({run_text}, {episode_text})' if std else f'Reward Curves ({episode_text})'
   # If std happens to be false, then add (No CI) to the title
   if not std:
     title += ' (No CI)'
@@ -85,7 +85,7 @@ def plot_reward_curves(rewards, configs, std_rewards=None, std=True):
       num_runs, num_generations, num_episodes, sigma, alpha, max_steps = config[1:]
       configuration_name = f'Zeroth Order (σ: {sigma}, α: {alpha}, max steps: {max_steps})'
     # Plot the average rewards
-    plt.plot(average_total_rewards, label=configuration_name)
+    plt.plot(average_total_rewards, label=configuration_name, alpha=0.5)
     if std_rewards is not None and std:
       #Plot the 95% confidence interval around the average
       upper_bound = average_total_rewards + 1.96 * std_rewards[i] / (num_runs ** 0.5)
@@ -94,7 +94,9 @@ def plot_reward_curves(rewards, configs, std_rewards=None, std=True):
 
   plt.legend(fontsize=12)  # Add a legend to the plot
 
-  plt.xlabel('Generation', fontsize=14, fontweight='bold', color='navy')  # Customize the x-label
+  xlabel = 'Evaluation Episode' if ep_saved else 'Generation'
+
+  plt.xlabel(xlabel, fontsize=14, fontweight='bold', color='navy')  # Customize the x-label
   plt.ylabel('Reward', fontsize=14, fontweight='bold', color='navy')  # Customize the y-label
   plt.xticks(fontsize=12)  # Customize the x-ticks
   plt.yticks(fontsize=12)  # Customize the y-ticks

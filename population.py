@@ -101,9 +101,6 @@ def run_population_experiment(project_name, num_runs, num_generations, num_episo
   for run in range(num_runs):
     policy = AffineThrottlePolicy(input_size=state_dim, hidden_size=128, output_size=action_dim)
     run_rewards = []
-    # Open the file in 'w' mode to clear it, then immediately close it.
-    with open(os.path.join(results_dir, f'run{run}.txt'), 'w') as f:
-      pass  # This will clear the file contents at the beginning of the run
 
     policy_reward = evaluate_policy(env, policy, num_episodes, max_steps)
     print(f'Generation 0 Reward: {policy_reward}')
@@ -148,13 +145,13 @@ if __name__ == '__main__':
   # k = 1
   # alpha = 0.001
   num_episodes = 20
-  num_generations = 1500
+  num_generations = 1
   num_runs = 10
   max_steps = 500
   N = 9
   sigma = 0.5
   k = 1
-  experiment = 'lunar_lander_population_all_ep_v2'
+  experiment = 'lunar_lander_population_all_ep_v3'
   run_population_experiment(experiment, num_runs, num_generations, num_episodes, N,
                             sigma, k, max_steps)
   generate_summary(experiment, type='population')
