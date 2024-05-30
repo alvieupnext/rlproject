@@ -138,7 +138,7 @@ if __name__ == '__main__':
   N = 9
   sigma = 0.5
   k = 1
-  experiment = 'lunar_lander_population_ray_test'
+  experiment = 'lunar_lander_population_ray'
   run_population_experiment(experiment, num_runs, num_generations, num_episodes, N,
                             sigma, k, max_steps)
   # generate_summary(experiment, type='population')
