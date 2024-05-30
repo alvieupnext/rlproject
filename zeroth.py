@@ -81,7 +81,7 @@ def zeroth_experiment_run(results_dir, run, num_generations, num_episodes, sigma
     policy.add_policy(p_plus)
     # Evaluate the new policy (OPTIONAL)
     policy_reward = evaluate_policy(env, policy, num_episodes, max_steps)
-    print(f'Generation {gen + 1}: Reward: {policy_reward}')
+    print(f'Generation {gen + 1}: Reward: {np.mean(policy_reward)}')
     run_rewards.append(policy_reward)
     # # Continue using append mode for subsequent writes within the same run
     # with open(os.path.join(results_dir, f'run{run}.txt'), 'a') as f:
