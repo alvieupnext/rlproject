@@ -94,7 +94,7 @@ def zeroth_experiment_run(results_dir, run, num_generations, num_episodes, sigma
 
 if __name__ == '__main__':
   # Train the policy
-  num_episodes = 40
+  num_episodes = 20
   num_generations = 1875
   # num_generations = 10
   num_runs = 10
