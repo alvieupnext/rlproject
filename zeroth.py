@@ -105,8 +105,8 @@ if __name__ == '__main__':
   alpha = 5e-3
   experiment = 'lunar_lander_zeroth_order'
   #Run the zeroth order experiment
-  # run_zeroth_order_experiment(experiment, num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
-  # generate_summary(experiment)
+  run_zeroth_order_experiment(experiment, num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
+  generate_summary(experiment)
   zeroth_avg_rewards, std_rewards, zeroth_rewards, config = read_project(experiment, type='zeroth', single_run=False)
   for i, rewards in enumerate(zeroth_rewards):
     print(f'Run {i}')
@@ -114,4 +114,4 @@ if __name__ == '__main__':
     print(f'Worst reward: {np.min(rewards)}')
     print(f'Average reward: {np.mean(rewards)}')
   plot_boxplot(zeroth_rewards, config)
-  # plot_rewards(zeroth_avg_rewards, config, std_rewards=std_rewards, rolling_window=10, individual_runs=individual_rewards, std=False)
+  plot_rewards(zeroth_avg_rewards, config, std_rewards=std_rewards, rolling_window=10, std=True)
