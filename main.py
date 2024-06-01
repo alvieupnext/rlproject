@@ -6,14 +6,17 @@ from plot import plot_rewards, plot_reward_curves
 from population import read_project
 
 if __name__ == '__main__':
-  population_rewards, population_config = read_project('lunar_lander_population_all_ep_v2',
-                                                                               type='population', single_run=True)
+  population_rewards, population_std, _, population_config = read_project('lunar_lander_population_ray_2nd',
+                                                                               type='population', single_run=False)
   print(len(population_rewards))
-  zeroth_rewards, zeroth_config = read_project('lunar_lander_zeroth_order_all_ep_v2', type='zeroth',
-                                                                   single_run=True)
+  zeroth_rewards, zeroth_std, _, zeroth_config = read_project('lunar_lander_zeroth_order_ray_2nd', type='zeroth',
+                                                                   single_run=False)
   print(len(zeroth_rewards))
   # print(total_rewards)
-  plot_reward_curves([population_rewards, zeroth_rewards], [population_config, zeroth_config],std=False)
+  plot_reward_curves([population_rewards, zeroth_rewards],
+                     [population_config, zeroth_config],
+                     std_rewards=[population_std, zeroth_std],
+                     rolling_window=10,)
 
   # # Get all folders in the results directory, that start with ll
   # population_project_names = [folder for folder in os.listdir('results/population') if folder.startswith('ll')]
