@@ -1,3 +1,5 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -66,10 +68,14 @@ def plot_rewards(average_total_rewards, config, std_rewards=None, rolling_window
   # Change the title to be a filename
   title = title.replace(' ', '_').replace('(', '').replace(')', '').replace(',', '').replace(':', '')
 
-  # Save the plot
+  # Make the plot folder if it doesn't exist
+  if not os.path.exists('plots'):
+    os.makedirs('plots')
+
   plt.savefig(
-    f'{title}.pdf',
+    f'plots/{title}.pdf',
     format='pdf', dpi=300)  # Save the plot to a file
+  plt.show()
 
   plt.show()
 
@@ -131,8 +137,12 @@ def plot_reward_curves(rewards, configs, std_rewards=None, std=True, ep_saved=Tr
 
   title = title.replace(' ', '_').replace('(', '').replace(')', '').replace(',', '').replace(':', '')
 
+  #Make the plot folder if it doesn't exist
+  if not os.path.exists('plots'):
+    os.makedirs('plots')
+
   plt.savefig(
-    f'{title}.pdf',
+    f'plots/{title}.pdf',
     format='pdf', dpi=300)  # Save the plot to a file
   plt.show()
 
@@ -172,10 +182,14 @@ def plot_boxplot(rewards, config):
   # Change the title to be a filename
   title = title.replace(' ', '_').replace('(', '').replace(')', '').replace(',', '').replace(':', '')
 
-  # Save the plot
+  # Make the plot folder if it doesn't exist
+  if not os.path.exists('plots'):
+    os.makedirs('plots')
+
   plt.savefig(
-    f'{title}.pdf',
+    f'plots/{title}.pdf',
     format='pdf', dpi=300)  # Save the plot to a file
+  plt.show()
 
   plt.show()
 
