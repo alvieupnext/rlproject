@@ -147,15 +147,16 @@ if __name__ == '__main__':
   sigma = 1
   k = 1
   experiment = 'lunar_lander_population_method'
-  population_avg_rewards, population_std_rewards, population_rewards, population_config = read_project(experiment,
-                                                                               type='population', single_run=False)
-  #From every poppulation run, get the best reward, worst reward and the average reward across the run
-  for i, rewards in enumerate(population_rewards):
-    print(f'Run {i}')
-    print(f'Best reward: {np.max(rewards)}')
-    print(f'Worst reward: {np.min(rewards)}')
-    print(f'Average reward: {np.mean(rewards)}')
-  plot_boxplot(population_rewards, population_config)
+  run_population_experiment(experiment, num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best=False)
+  # population_avg_rewards, population_std_rewards, population_rewards, population_config = read_project(experiment,
+  #                                                                              type='population', single_run=False)
+  # #From every poppulation run, get the best reward, worst reward and the average reward across the run
+  # for i, rewards in enumerate(population_rewards):
+  #   print(f'Run {i}')
+  #   print(f'Best reward: {np.max(rewards)}')
+  #   print(f'Worst reward: {np.min(rewards)}')
+  #   print(f'Average reward: {np.mean(rewards)}')
+  # plot_boxplot(population_rewards, population_config)
   # plot_rewards(population_avg_rewards, population_config, population_std_rewards,
   #              rolling_window=10, std=True)
 
