@@ -1,7 +1,7 @@
 import gym
 from elegantrl.train.run import *
 
-from plot import plot_rewards, plot_reward_curves
+from plot import plot_rewards, plot_reward_curves, plot_boxplot
 from policy import ParametricPolicy, AffineThrottlePolicy
 from pertubation import *
 from utils import evaluate_policy, generate_summary, read_project
@@ -69,6 +69,8 @@ def zeroth_experiment_run(results_dir, run, num_generations, num_episodes, sigma
     # The rewards are arrays of the evaluation episode rewards
     mean_rewards = np.mean(rewards, axis=1)
     p_plus_score, p_min_score = mean_rewards
+    # Print both scores
+    print(f'Generation {gen + 1}: Positive Score: {p_plus_score}, Negative Score: {p_min_score}')
     # A sort of gradient of θ, that we did not have to compute, is now given by “0.5 × (score of θ+ -
     # score of θ-) × θ+”.
     # Calculate this gradient, we already apply alpha here
@@ -80,8 +82,8 @@ def zeroth_experiment_run(results_dir, run, num_generations, num_episodes, sigma
     # The step size is α, and the direction is the gradient.
     policy.add_policy(p_plus)
     # Evaluate the new policy (OPTIONAL)
-    policy_reward = evaluate_policy(env, policy, num_episodes, max_steps)
-    print(f'Generation {gen + 1}: Reward: {np.mean(policy_reward)}')
+    # policy_reward = evaluate_policy(env, policy, num_episodes, max_steps)
+    # print(f'Generation {gen + 1}: Reward: {np.mean(policy_reward)}')
     run_rewards.append(policy_reward)
     # # Continue using append mode for subsequent writes within the same run
     # with open(os.path.join(results_dir, f'run{run}.txt'), 'a') as f:
@@ -94,16 +96,22 @@ def zeroth_experiment_run(results_dir, run, num_generations, num_episodes, sigma
 
 if __name__ == '__main__':
   # Train the policy
-  num_episodes = 20
-  num_generations = 1875
+  num_episodes = 1
+  num_generations = 5000
   # num_generations = 10
   num_runs = 10
   max_steps = 500
-  sigma = 0.5
-  alpha = 0.001
-  experiment = 'lunar_lander_zeroth_order_ray'
+  sigma = 1
+  alpha = 5e-3
+  experiment = 'lunar_lander_zeroth_order'
   #Run the zeroth order experiment
-  run_zeroth_order_experiment(experiment, num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
+  # run_zeroth_order_experiment(experiment, num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
   # generate_summary(experiment)
-  # total_rewards, std_rewards, config = read_project(experiment, type='zeroth', single_run=False)
-  # plot_rewards(total_rewards, config)
+  zeroth_avg_rewards, std_rewards, zeroth_rewards, config = read_project(experiment, type='zeroth', single_run=False)
+  for i, rewards in enumerate(zeroth_rewards):
+    print(f'Run {i}')
+    print(f'Best reward: {np.max(rewards)}')
+    print(f'Worst reward: {np.min(rewards)}')
+    print(f'Average reward: {np.mean(rewards)}')
+  plot_boxplot(zeroth_rewards, config)
+  # plot_rewards(zeroth_avg_rewards, config, std_rewards=std_rewards, rolling_window=10, individual_runs=individual_rewards, std=False)

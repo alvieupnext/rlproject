@@ -1,11 +1,13 @@
 import gym
 from elegantrl.train.run import *
 
-from plot import plot_rewards, plot_reward_curves
+from plot import plot_rewards, plot_reward_curves, plot_boxplot
 from policy import ParametricPolicy, AffineThrottlePolicy
 from pertubation import *
 from utils import evaluate_policy, read_project, generate_summary
 import ray
+
+from zeroth import run_zeroth_order_experiment
 
 gym.logger.set_level(40)  # Block warning
 
@@ -51,7 +53,10 @@ def average_top_k_policies(policies, rewards, k=1):
 
   # Print the top k policies and their rewards
   for i, index in enumerate(top_indices):
-    print(f'Top {i + 1} Policy: Index {index}, Reward: {rewards[index]}')
+    print(f'Top {i + 1} Policy: Index {index}, Reward: {np.mean(rewards[index])}')
+
+  #From all rewards, the average reward from the policies
+  print(f'Average Reward: {np.mean(mean_rewards)}')
 
   # Start averaging the parameters of the top k policies
   average_policy = copy.deepcopy(best_policy)
@@ -67,7 +72,7 @@ def average_top_k_policies(policies, rewards, k=1):
   for param in average_policy.parameters():
     param.data /= weight
 
-  return average_policy, best_rewards
+  return average_policy, best_rewards, index
 
 
 def run_population_experiment(project_name, num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best=True):
@@ -121,7 +126,7 @@ def population_experiment_run(results_dir, run, num_generations, num_episodes, N
     # Rewards contains N arrays, make them a single array
     all_rewards = [num for sublist in rewards for num in sublist]
 
-    average_policy, best_rewards = average_top_k_policies(policies, rewards, k=k)
+    average_policy, best_rewards, index = average_top_k_policies(policies, rewards, k=k)
 
     policy = average_policy
     # Continue using append mode for subsequent writes within the same run
@@ -129,22 +134,30 @@ def population_experiment_run(results_dir, run, num_generations, num_episodes, N
       # Write every reward of best_rewards to the file
       for episode_reward in all_rewards:
         f.write(f',{episode_reward}')
+    #Open a new file that writes the chosen index to a supplementary file
+    with open(os.path.join(results_dir, f'run{run}_index.txt'), 'a') as f:
+      f.write(f'{index}\n') # Write the chosen index to the file
 
 if __name__ == '__main__':
-  num_episodes = 20
-  num_generations = 750
+  num_episodes = 2
+  num_generations = 500
   num_runs = 10
   max_steps = 500
-  N = 9
-  sigma = 0.5
+  N = 10
+  sigma = 1
   k = 1
-  experiment = 'lunar_lander_population_ray'
-  run_population_experiment(experiment, num_runs, num_generations, num_episodes, N,
-                            sigma, k, max_steps)
-  # generate_summary(experiment, type='population')
-  # population_rewards, population_std_rewards, population_config = read_project(experiment,
-  #                                                                              type='population', single_run=False)
-  # plot_rewards(population_rewards, population_config, population_std_rewards)
+  experiment = 'lunar_lander_population_method'
+  population_avg_rewards, population_std_rewards, population_rewards, population_config = read_project(experiment,
+                                                                               type='population', single_run=False)
+  #From every poppulation run, get the best reward, worst reward and the average reward across the run
+  for i, rewards in enumerate(population_rewards):
+    print(f'Run {i}')
+    print(f'Best reward: {np.max(rewards)}')
+    print(f'Worst reward: {np.min(rewards)}')
+    print(f'Average reward: {np.mean(rewards)}')
+  plot_boxplot(population_rewards, population_config)
+  # plot_rewards(population_avg_rewards, population_config, population_std_rewards,
+  #              rolling_window=10, std=True)
 
   # run_population_experiment('lunar_lander_optimal_1eval_20_runs_test', num_runs, num_generations, num_episodes, N, sigma, k, max_steps)
   # total_rewards, config = read_project(
