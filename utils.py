@@ -34,7 +34,7 @@ def evaluate_policy(env, policy, num_episodes, max_steps):
   # Return the array of policy rewards
   return policy_reward
 
-def read_project(project_name, single_run=True, type='population'):
+def read_project(project_name, single_run=1, type='population', amount_of_runs=10):
   """
   Reads and returns the average and standard deviation of rewards
   for a given project.
@@ -48,11 +48,15 @@ def read_project(project_name, single_run=True, type='population'):
   """
   results_dir = os.path.join(f'results/{type}', project_name)
   config_file_path = os.path.join(results_dir, 'config.txt')
+  run_paths = []
   # Placeholder, read instead from run0.txt
   if single_run:
-    average_file_path = os.path.join(results_dir, 'run0.txt')
+    average_file_path = os.path.join(results_dir, f'run{single_run-1}.txt')
   else:
     average_file_path = os.path.join(results_dir, 'summary_average.txt')
+    for run in range(amount_of_runs):
+      run_file_path = os.path.join(results_dir, f'run{run}.txt')
+      run_paths.append(run_file_path)
   std_file_path = os.path.join(results_dir, 'summary_std.txt')
 
   # Read configuration
@@ -92,7 +96,12 @@ def read_project(project_name, single_run=True, type='population'):
   if not single_run:
     with open(std_file_path, 'r') as file:
       std_rewards = np.array([float(value) for value in file.read().split(',')])
-      return average_rewards, std_rewards, config
+    #For every run_path, read the rewards and append them to the rewards array
+    rewards = []
+    for run_path in run_paths:
+      with open(run_path, 'r') as file:
+        rewards.append(np.array([float(value) for value in file.read().split(',')]))
+    return average_rewards, std_rewards, rewards, config
   # with open(std_file_path, 'r') as file:
   #   std_rewards = np.array([float(value) for value in file.read().split(',')])
 
@@ -107,6 +116,8 @@ def generate_summary(project_name, type='zeroth'):
   results_dir = os.path.join(f'results/{type}', project_name)
   #Get all files that start with run and are a txt file
   run_files = [file for file in os.listdir(results_dir) if file.startswith('run') and file.endswith('.txt')]
+  #Filter all files that have the word index in the name of the file
+  run_files = [file for file in run_files if 'index' not in file]
   #From all run_files, get their rewards (delimited by commas)
   rewards = []
   for run_file in run_files:
