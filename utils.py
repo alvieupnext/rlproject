@@ -46,7 +46,8 @@ def read_project(project_name, single_run=1, type='population', amount_of_runs=1
       tuple: A tuple containing two numpy arrays, the first being the average
       rewards and the second being the standard deviation of rewards.
   """
-  results_dir = os.path.join(f'results/{type}', project_name)
+  results_dir = os.path.join('results', type, project_name)
+  print(results_dir)
   config_file_path = os.path.join(results_dir, 'config.txt')
   run_paths = []
   # Placeholder, read instead from run0.txt
@@ -85,7 +86,7 @@ def read_project(project_name, single_run=1, type='population', amount_of_runs=1
 
   # Read average rewards
   with open(average_file_path, 'r') as file:
-    average_rewards = np.array([float(value) for value in file.read().split(',')])
+    average_rewards = np.array([float(value) for value in file.read().split(',') if value])
   config = None
   if type == 'population':
     config = ('population', num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best)
@@ -100,7 +101,7 @@ def read_project(project_name, single_run=1, type='population', amount_of_runs=1
     rewards = []
     for run_path in run_paths:
       with open(run_path, 'r') as file:
-        rewards.append(np.array([float(value) for value in file.read().split(',')]))
+        rewards.append(np.array([float(value) for value in file.read().split(',') if value]))
     return average_rewards, std_rewards, rewards, config
   # with open(std_file_path, 'r') as file:
   #   std_rewards = np.array([float(value) for value in file.read().split(',')])
@@ -112,25 +113,29 @@ def read_project(project_name, single_run=1, type='population', amount_of_runs=1
 
 #Generate the average reward and std reward files from a project
 def generate_summary(project_name, type='zeroth'):
-  #Locate the project
-  results_dir = os.path.join(f'results/{type}', project_name)
-  #Get all files that start with run and are a txt file
-  run_files = [file for file in os.listdir(results_dir) if file.startswith('run') and file.endswith('.txt')]
-  #Filter all files that have the word index in the name of the file
-  run_files = [file for file in run_files if 'index' not in file]
-  #From all run_files, get their rewards (delimited by commas)
-  rewards = []
-  for run_file in run_files:
-    with open(os.path.join(results_dir, run_file), 'r') as f:
-      rewards.append(np.array([float(reward) for reward in f.read().split(',')]))
-  #Get the average and std of the rewards
-  average_rewards = np.mean(rewards, axis=0)
-  std_rewards = np.std(rewards, axis=0)
-  #Write the average and std to the summary files
-  with open(os.path.join(results_dir, 'summary_average.txt'), 'w') as f:
-    f.write(','.join(map(str, average_rewards)))
-  with open(os.path.join(results_dir, 'summary_std.txt'), 'w') as f:
-    f.write(','.join(map(str, std_rewards)))
+    # Locate the project
+    results_dir = os.path.join(f'results/{type}', project_name)
+    # Get all files that start with run and are a txt file
+    run_files = [file for file in os.listdir(results_dir) if file.startswith('run') and file.endswith('.txt')]
+    # Filter all files that have the word index in the name of the file
+    run_files = [file for file in run_files if 'index' not in file]
+    # From all run_files, get their rewards (delimited by commas)
+    rewards = []
+    for run_file in run_files:
+        with open(os.path.join(results_dir, run_file), 'r') as f:
+            content = f.read()
+            # Split by comma and filter out empty strings
+            reward_values = [reward for reward in content.split(',') if reward.strip()]
+            rewards.append(np.array([float(reward) for reward in reward_values]))
+    # Get the average and std of the rewards
+    average_rewards = np.mean(rewards, axis=0)
+    std_rewards = np.std(rewards, axis=0)
+    # Write the average and std to the summary files
+    with open(os.path.join(results_dir, 'summary_average.txt'), 'w') as f:
+        f.write(','.join(map(str, average_rewards)))
+    with open(os.path.join(results_dir, 'summary_std.txt'), 'w') as f:
+        f.write(','.join(map(str, std_rewards)))
+
 
 
 
