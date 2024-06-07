@@ -96,14 +96,14 @@ def zeroth_experiment_run(results_dir, run, num_generations, num_episodes, sigma
 
 if __name__ == '__main__':
   # Train the policy
-  num_episodes = 1
-  num_generations = 5000
+  num_episodes = 2
+  num_generations = 2500
   # num_generations = 10
   num_runs = 10
   max_steps = 500
   sigma = 1
-  alpha = 5e-3
-  experiment = 'lunar_lander_zeroth_order'
+  alpha = 0.001
+  experiment = 'lunar_lander_zeroth_order_0.001_2500_2'
   #Run the zeroth order experiment
   run_zeroth_order_experiment(experiment, num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
   generate_summary(experiment)
