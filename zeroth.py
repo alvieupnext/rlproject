@@ -102,8 +102,8 @@ if __name__ == '__main__':
   num_runs = 10
   max_steps = 500
   sigma = 1
-  alpha = 0.001
-  experiment = 'lunar_lander_zeroth_order_0.001_2500_2'
+  alpha = 0.005
+  experiment = 'lunar_lander_zeroth_order_0.005_2_2500'
   #Run the zeroth order experiment
   run_zeroth_order_experiment(experiment, num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
   generate_summary(experiment)
