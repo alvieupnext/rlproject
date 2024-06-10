@@ -70,6 +70,7 @@ def average_top_k_policies(policies, rewards, k=1):
   # Normalize the averaged parameters by the total weight
   for param in average_policy.parameters():
     param.data /= weight
+  print(weight)
 
   return average_policy, best_rewards, index
 
@@ -144,8 +145,8 @@ if __name__ == '__main__':
   max_steps = 500
   N = 10
   sigma = 1
-  k = 2
-  experiment = 'lunar_lander_population_method_top2_weight_adjusted'
+  k = 10
+  experiment = 'lunar_lander_population_method_top10_weight_adjusted'
   run_population_experiment(experiment, num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best=False)
   generate_summary(experiment, type='population')
   population_avg_rewards, population_std_rewards, population_rewards, population_config = read_project(experiment,
