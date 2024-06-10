@@ -71,15 +71,15 @@ def zeroth_experiment_run(results_dir, run, num_generations, num_episodes, sigma
     p_plus_score, p_min_score = mean_rewards
     # Print both scores
     print(f'Generation {gen + 1}: Positive Score: {p_plus_score}, Negative Score: {p_min_score}')
-    # A sort of gradient of θ, that we did not have to compute, is now given by “0.5 × (score of θ+ -
+    # A sort of pseudogradient of θ, that we did not have to compute, is now given by “0.5 × (score of θ+ -
     # score of θ-) × θ+”.
-    # Calculate this gradient, we already apply alpha here
-    gradient = alpha * (0.5 * (p_plus_score - p_min_score))
-    # Move the positive perturbation in the direction of the gradient
+    # Calculate the pseudogradient, we already apply alpha here
+    pseudogradient = alpha * (0.5 * (p_plus_score - p_min_score))
+    # Move the positive perturbation in the direction of the pseudogradient
     for param in p_plus.parameters():
-      param.data *= gradient
-    # Move θ, the parameters of the policy, in the direction of the gradient.
-    # The step size is α, and the direction is the gradient.
+      param.data *= pseudogradient
+    # Move θ, the parameters of the policy, in the direction of the pseudogradient.
+    # The step size is α, and the direction is the pseudogradient.
     policy.add_policy(p_plus)
     # Evaluate the new policy (OPTIONAL)
     # policy_reward = evaluate_policy(env, policy, num_episodes, max_steps)
