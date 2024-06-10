@@ -62,7 +62,7 @@ def average_top_k_policies(policies, rewards, k=1):
   average_policy = copy.deepcopy(best_policy)
   weight = 1  # Initial weight for the best policy
   for i, policy_index in enumerate(top_indices[1:], start=1):  # Skip the best policy itself
-    adjustment_weight = 1 / (2 * i)
+    adjustment_weight = 1 / (2 ** i)
     for (param, avg_param) in zip(policies[policy_index].parameters(), average_policy.parameters()):
       # Adjust parameters based on rank and add to average
       avg_param.data += param.data * adjustment_weight
