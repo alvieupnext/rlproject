@@ -4,7 +4,7 @@ from elegantrl.train.run import *
 from plot import plot_rewards, plot_reward_curves, plot_boxplot
 from policy import ParametricPolicy, AffineThrottlePolicy
 from pertubation import *
-from utils import evaluate_policy, read_project, generate_summary
+from utils import evaluate_policy, read_project, generate_summary, hidden_size
 import ray
 
 from zeroth import run_zeroth_order_experiment
@@ -62,12 +62,11 @@ def average_top_k_policies(policies, rewards, k=1):
   average_policy = copy.deepcopy(best_policy)
   weight = 1  # Initial weight for the best policy
   for i, policy_index in enumerate(top_indices[1:], start=1):  # Skip the best policy itself
+    adjustment_weight = 1 / (2 * i)
     for (param, avg_param) in zip(policies[policy_index].parameters(), average_policy.parameters()):
       # Adjust parameters based on rank and add to average
-      adjustment_weight = 1 / (2 * (i + 1))
       avg_param.data += param.data * adjustment_weight
-      weight += adjustment_weight
-
+    weight += adjustment_weight
   # Normalize the averaged parameters by the total weight
   for param in average_policy.parameters():
     param.data /= weight
@@ -109,7 +108,7 @@ def run_population_experiment(project_name, num_runs, num_generations, num_episo
 def population_experiment_run(results_dir, run, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best=True):
   # Initialize the environment using the provided utility functions and arguments
   env = gym.make('LunarLanderContinuous-v2')
-  policy = AffineThrottlePolicy(input_size=state_dim, hidden_size=128, output_size=action_dim)
+  policy = AffineThrottlePolicy(input_size=state_dim, hidden_size=hidden_size, output_size=action_dim)
   run_rewards = []
 
   policy_reward = evaluate_policy(env, policy, num_episodes, max_steps)
@@ -145,8 +144,8 @@ if __name__ == '__main__':
   max_steps = 500
   N = 10
   sigma = 1
-  k = 1
-  experiment = 'lunar_lander_population_method'
+  k = 2
+  experiment = 'lunar_lander_population_method_top2_weight_adjusted'
   run_population_experiment(experiment, num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best=False)
   generate_summary(experiment, type='population')
   population_avg_rewards, population_std_rewards, population_rewards, population_config = read_project(experiment,

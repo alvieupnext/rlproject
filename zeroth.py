@@ -4,7 +4,7 @@ from elegantrl.train.run import *
 from plot import plot_rewards, plot_reward_curves, plot_boxplot
 from policy import ParametricPolicy, AffineThrottlePolicy
 from pertubation import *
-from utils import evaluate_policy, generate_summary, read_project
+from utils import evaluate_policy, generate_summary, read_project, hidden_size
 import ray
 
 gym.logger.set_level(40)  # Block warning
@@ -51,7 +51,7 @@ def run_zeroth_order_experiment(project_name, num_runs, num_generations, num_epi
 def zeroth_experiment_run(results_dir, run, num_generations, num_episodes, sigma, alpha, max_steps):
   # Initialize the environment using the provided utility functions and arguments
   env = gym.make('LunarLanderContinuous-v2')
-  policy = AffineThrottlePolicy(input_size=state_dim, hidden_size=128, output_size=action_dim)
+  policy = AffineThrottlePolicy(input_size=state_dim, hidden_size=hidden_size, output_size=action_dim)
   run_rewards = []
   # Open the file in 'w' mode to clear it, then immediately close it.
   with open(os.path.join(results_dir, f'run{run}.txt'), 'w') as f:
@@ -99,15 +99,16 @@ if __name__ == '__main__':
   num_episodes = 2
   num_generations = 2500
   # num_generations = 10
-  num_runs = 10
+  num_runs = 20
   max_steps = 500
   sigma = 1
-  alpha = 0.005
-  experiment = 'lunar_lander_zeroth_order_0.005_2_2500'
+  alpha = 0.001
+  experiment = 'lunar_lander_zeroth_order_0.001_2500_2'
   #Run the zeroth order experiment
-  run_zeroth_order_experiment(experiment, num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
+  # run_zeroth_order_experiment(experiment, num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
   generate_summary(experiment)
-  zeroth_avg_rewards, std_rewards, zeroth_rewards, config = read_project(experiment, type='zeroth', single_run=False)
+  zeroth_avg_rewards, std_rewards, zeroth_rewards, config = read_project(experiment, type='zeroth', single_run=False,
+                                                                         amount_of_runs=num_runs)
   for i, rewards in enumerate(zeroth_rewards):
     print(f'Run {i}')
     print(f'Best reward: {np.max(rewards)}')

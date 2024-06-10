@@ -1,5 +1,7 @@
 #Functions that are shared between the different scripts
 from elegantrl.train.run import *
+
+hidden_size = 128
 def evaluate_policy(env, policy, num_episodes, max_steps):
   policy_reward = []
   for episode in range(num_episodes):
