@@ -1,4 +1,5 @@
-from population import run_population_experiment, generate_project_name, run_zeroth_order_experiment
+from population import run_population_experiment, run_zeroth_order_experiment
+from utils import generate_project_name
 import ray
 
 # The various hyperparameters
