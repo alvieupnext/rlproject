@@ -146,7 +146,7 @@ if __name__ == '__main__':
   N = 10
   sigma = 1
   k = 3
-  experiment = 'lunar_lander_population'
+  experiment = 'lunar_lander_population_method'
   run_population_experiment(experiment, num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best=False)
   generate_summary(experiment, type='population')
   population_avg_rewards, population_std_rewards, population_rewards, population_config = read_project(experiment,
