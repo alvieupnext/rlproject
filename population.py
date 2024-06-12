@@ -141,12 +141,12 @@ def population_experiment_run(results_dir, run, num_generations, num_episodes, N
 if __name__ == '__main__':
   num_episodes = 2
   num_generations = 500
-  num_runs = 10
+  num_runs = 20
   max_steps = 500
   N = 10
   sigma = 1
-  k = 10
-  experiment = 'lunar_lander_population_method_top10_weight_adjusted'
+  k = 3
+  experiment = 'lunar_lander_population'
   run_population_experiment(experiment, num_runs, num_generations, num_episodes, N, sigma, k, max_steps, keep_previous_best=False)
   generate_summary(experiment, type='population')
   population_avg_rewards, population_std_rewards, population_rewards, population_config = read_project(experiment,

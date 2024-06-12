@@ -79,7 +79,7 @@ def plot_rewards(average_total_rewards, config, std_rewards=None, rolling_window
 
   plt.show()
 
-def plot_reward_curves(rewards, configs, std_rewards=None, std=True, ep_saved=True, rolling_window=1):
+def plot_reward_curves(rewards, configs, std_rewards=None, std=True, ep_saved=True, rolling_window=1, ylim=None):
   # Make a figure and a line per configuration
   sns.set(style='whitegrid')  # Set a style to make the plot look nicer
 
@@ -130,6 +130,9 @@ def plot_reward_curves(rewards, configs, std_rewards=None, std=True, ep_saved=Tr
   plt.ylabel('Reward', fontsize=14, fontweight='bold', color='navy')  # Customize the y-label
   plt.xticks(fontsize=12)  # Customize the x-ticks
   plt.yticks(fontsize=12)  # Customize the y-ticks
+
+  #Limit the y-axis to the specified value
+  plt.ylim(ylim)
 
   plt.grid(True, which='both', linestyle='--', linewidth=0.5)  # Add gridlines for better readability
 
