@@ -105,7 +105,7 @@ if __name__ == '__main__':
   alpha = 1
   experiment = 'lunar_lander_zeroth_order'
   #Run the zeroth order experiment
-  run_zeroth_order_experiment(experiment, num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
+  # run_zeroth_order_experiment(experiment, num_runs, num_generations, num_episodes, sigma, alpha, max_steps)
   generate_summary(experiment)
   zeroth_avg_rewards, std_rewards, zeroth_rewards, config = read_project(experiment, type='zeroth', single_run=False,
                                                                          amount_of_runs=num_runs)
